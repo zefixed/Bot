@@ -18,8 +18,3 @@ def send_text(message):
 
 
 bot.polling()
-<<<<<<< HEAD
-
-фвпаыпрыао
-=======
->>>>>>> ca26fb7d0c95759d2c060ee910727eb48a2a195c
