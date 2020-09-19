@@ -18,3 +18,5 @@ def send_text(message):
 
 
 bot.polling()
+
+кркурукрукрукр
