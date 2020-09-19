@@ -12,9 +12,9 @@ def start_message(message):
 @bot.message_handler(content_types=['text'])
 def send_text(message):
     if message.text.lower() == 'привет':
-        bot.send_message(message.chat.id, 'Привет, пользователь')
+        bot.send_message(message.chat.id, 'Привет, Пользователь')
     elif message.text.lower() == 'пока':
-        bot.send_message(message.chat.id, 'Прощай, пользователь')
+        bot.send_message(message.chat.id, 'Прощай, Пользователь')
 
 
 bot.polling()
