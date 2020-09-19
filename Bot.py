@@ -18,5 +18,3 @@ def send_text(message):
 
 
 bot.polling()
-
-gasgfgfd
