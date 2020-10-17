@@ -30,6 +30,24 @@ if message.text.lower == 'хочу':
 elif message.text.lower == 'не хочу':
     bot.send_message(message.chat.id, 'Ну как хочешь, Аноним')
 #-----------------------------------------------------------------------------------------------------------------------
+def send_text(message):
+    try:
+        global name, i
+        if message.text.lower() == 'привет' and name == '' and i == 0:
+            bot.send_message(message.chat.id, 'Привет, если хочешь чтобы я к тебе обращался по имени введи /reg (не обязательно)')
+            i = 1
+        elif message.text.lower() == 'привет' and name == '' and i == 1:
+            bot.send_message(message.chat.id, 'Привет, Аноним')
+            name = 'Аноним'
+        elif message.text.lower() == 'привет' and name != '':
+            bot.send_message(message.chat.id, 'Привет, {}'.format(name))
+        elif message.text.lower() == 'пока' and name == '':
+            bot.send_message(message.chat.id, 'Прощай, Аноним')
+        elif message.text.lower() == 'пока' and name != '':
+            bot.send_message(message.chat.id, 'Прощай, {}'.format(name))
+    except Exception:
+        bot.reply_to(message, 'Ошибка')
+
 #-----------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------
