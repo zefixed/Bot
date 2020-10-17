@@ -5,10 +5,10 @@ db = mysql.connector.connect(
     host="localhost",
     user="root",
     password="root",
-    database='testdb'
 )
 
 cursor = db.cursor()
+cursor.execute("CREATE TABLE users (first_name VARCHAR(255), last_name VARCHAR(255))")
 
 
 bot = telebot.TeleBot('1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY')
