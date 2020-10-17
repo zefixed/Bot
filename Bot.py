@@ -16,7 +16,6 @@ bot = telebot.TeleBot('1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY')
 kb = telebot.types.ReplyKeyboardMarkup(True, True)
 kb.row('Привет', 'Пока')
 
-name = ''
 i = 0
 user_data = {}
 
@@ -42,8 +41,8 @@ def start_help_message(message):
         elif message.text == '/adm':
             adm = bot.send_message(message.chat.id,'Введите пароль')
             bot.register_next_step_handler(adm, admin_panel)
-    except Exception:
-        bot.reply_to(message, 'Ошибка')
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 def reg_message(message):
     try:
@@ -52,8 +51,8 @@ def reg_message(message):
 
         msg = bot.send_message(message.chat.id, "Введите фамилию")
         bot.register_next_step_handler(msg, process_lastname_step)
-    except Exception:
-        bot.reply_to(message, 'Ошибка')
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 def process_lastname_step(message):
     try:
@@ -68,8 +67,8 @@ def process_lastname_step(message):
         db.commit()
 
         bot.send_message(message.chat.id, "Вы успешно зарегистрированны!")
-    except Exception:
-        bot.reply_to(message, 'Ошибка, или вы уже зарегистрированны!')
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
@@ -87,8 +86,8 @@ def send_text(message):
             bot.send_message(message.chat.id, 'Прощай, Аноним')
         elif message.text.lower() == 'пока' and name != '':
             bot.send_message(message.chat.id, 'Прощай, {}'.format(name))
-    except Exception:
-        bot.reply_to(message, 'Ошибка')
+    except Exception as e :
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 @bot.message_handler(content_types=['text'])
 def admin_panel(message):
@@ -96,8 +95,8 @@ def admin_panel(message):
         if message.text.lower() == 'f297a57a5a743894a0e4a801fc3':
             bot.send_message(message.chat.id, 'Добро пожаловать в админ панель')
             bot.send_message(message.chat.id, 'Здесь пока ничего нет, но скоро я обязательно сяду и что-нибудь сюда добавлю ))')
-    except Exception:
-        bot.reply_to(message, 'Ошибка')
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
 bot.polling()
