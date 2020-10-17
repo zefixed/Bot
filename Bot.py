@@ -5,10 +5,10 @@ db = mysql.connector.connect(
     host="localhost",
     user="root",
     password="root",
+    database="Testdb"
 )
 
 cursor = db.cursor()
-cursor.execute("CREATE TABLE users (first_name VARCHAR(255), last_name VARCHAR(255))")
 
 
 bot = telebot.TeleBot('1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY')
@@ -28,6 +28,7 @@ class User:
 @bot.message_handler(commands=['start', 'help', 'reg','adm'])
 def start_help_message(message):
     try:
+        global usid
         if message.text == '/start':
             bot.send_message(message.chat.id, 'Привет, если не знаешь как мной пользоваться или ты тут в первый раз можешь написать /help для просмотра доступных команд', reply_markup=kb)
         elif message.text == '/help':
@@ -100,3 +101,4 @@ def admin_panel(message):
 
 
 bot.polling()
+
