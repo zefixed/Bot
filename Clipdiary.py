@@ -49,9 +49,12 @@ def send_text(message):
         bot.reply_to(message, 'Ошибка')
 
 #-----------------------------------------------------------------------------------------------------------------------
+        user_id = message.from_user.id
+        user_data[user_id] = User(message.text)
+
         sql = 'SELECT first_name FROM users WHERE user_id = %s'
-        val = (message.from_user.id, )
-        name = (cursor.execute(sql, val))
+        val = (user_id, )
+        name = str((cursor.execute(sql, val)))
         print(name)
         bot.send_message(message.chat.id, 'Привет, {}'.format(name))
 #-----------------------------------------------------------------------------------------------------------------------
