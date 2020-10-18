@@ -27,7 +27,6 @@ class User:
 @bot.message_handler(commands=['start', 'help', 'reg','adm'])
 def start_help_message(message):
     try:
-        global usid
         if message.text == '/start':
             bot.send_message(message.chat.id, 'Привет, если не знаешь как мной пользоваться или ты тут в первый раз можешь написать /help для просмотра доступных команд', reply_markup=kb)
         elif message.text == '/help':
