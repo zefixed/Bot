@@ -18,6 +18,7 @@ kb.row('Привет', 'Пока')
 
 i = 0
 user_data = {}
+name = ''
 
 class User:
     def __init__(self, first_name):
