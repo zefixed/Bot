@@ -1,4 +1,9 @@
+def ------(message):
+    try:
 
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+#-----------------------------------------------------------------------------------------------------------------------
 @bot.message_handler(commands=['help'])
 def help_message(message):
     bot.send_message(message.chat.id, 'Test')
@@ -60,4 +65,35 @@ def send_text(message):
 #-----------------------------------------------------------------------------------------------------------------------
 cursor.execute('CREATE TABLE `articles` (`id` tinyint unsigned NOT NULL auto_increment, `question` varchar(255) default NULL, `answer` text, PRIMARY KEY (`id`), FULLTEXT KEY `ft1` (`question`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;')
 #-----------------------------------------------------------------------------------------------------------------------
+def admin_panel_create_question(message):
+    try:
+        msg = bot.send_message(message.chat.id, 'Введите вопрос')
+        bot.register_next_step_handler(msg, admin_panel_create_answer)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+def admin_panel_create_answer(message):
+    try:
+        datab_id = message.from_user.id
+        datab_data[datab_id] = Datab(message.text)
+
+        Datab.question = message.text
+        msg = bot.send_message(message.chat.id, 'Введите ответ')
+        bot.register_next_step_handler(msg, admin_panel_create_question)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+def admin_panel_create_question(message):
+    try:
+        datab_id = message.from_user.id
+        datab = datab_data[datab_id]
+        datab.answer = message.text
+
+        sql = "INSERT INTO articles (question, answer) \
+                                          VALUES (%s, %s)"
+        val = (Datab.question, Datab.answer)
+        cursor.execute(sql, val)
+        db.commit()
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 #-----------------------------------------------------------------------------------------------------------------------
