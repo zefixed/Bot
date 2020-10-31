@@ -10,7 +10,6 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
-
 bot = telebot.TeleBot('1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY')
 
 kb = telebot.types.ReplyKeyboardMarkup(True, True)
