@@ -1,5 +1,6 @@
 import telebot
 import mysql.connector
+import config as cfg
 
 db = mysql.connector.connect(
     host="localhost",
@@ -10,13 +11,16 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
-bot = telebot.TeleBot('1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY')
+bot = telebot.TeleBot(cfg.token)
 
-kb = telebot.types.ReplyKeyboardMarkup(True, True)
-kb.row('Привет', 'Пока')
-
+datab_data = {}
 user_data = {}
 name = ''
+
+class Datab:
+    def __init__(self, question):
+        self.question = question
+        self.answer = ''
 
 class User:
     def __init__(self, first_name):
@@ -27,7 +31,7 @@ class User:
 def start_help_message(message):
     try:
         if message.text == '/start':
-            bot.send_message(message.chat.id, 'Привет, если не знаешь как мной пользоваться или ты тут в первый раз можешь написать /help для просмотра доступных команд', reply_markup=kb)
+            bot.send_message(message.chat.id, 'Привет, если не знаешь как мной пользоваться или ты тут в первый раз можешь написать /help для просмотра доступных команд', reply_markup=cfg.kb)
         elif message.text == '/help':
             bot.send_message(message.chat.id, 'Доступные команду\n'
                                               '1. /start (Используется для начала общения со мной)\n'
@@ -38,7 +42,7 @@ def start_help_message(message):
             name = bot.send_message(message.chat.id, 'Введите имя')
             bot.register_next_step_handler(name, reg_firstname_step)
         elif message.text == '/adm':
-            adm = bot.send_message(message.chat.id,'Введите пароль')
+            adm = bot.send_message(message.chat.id, 'Введите пароль')
             bot.register_next_step_handler(adm, admin_panel)
         elif message.text == '/rereg':
             name = bot.send_message(message.chat.id, 'Введите имя')
@@ -118,12 +122,59 @@ def send_text(message):
 @bot.message_handler(content_types=['text'])
 def admin_panel(message):
     try:
-        if message.text.lower() == 'f297a57a5a743894a0e4a801fc3':
-            bot.send_message(message.chat.id, 'Добро пожаловать в админ панель')
-            bot.send_message(message.chat.id, 'Здесь пока ничего нет, но скоро я обязательно сяду и что-нибудь сюда добавлю ))')
+        if message.text == cfg.adm:
+            msg = bot.send_message(message.chat.id, 'Добро пожаловать в админ панель', reply_markup=cfg.kb_admc)
+            bot.register_next_step_handler(msg, admin_panel_what)
+        else:
+                bot.send_message(message.chat.id, 'Неправильный пароль, попробуйте ещё раз', reply_markup=cfg.kb_adm)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
+def admin_panel_what(message):
+    try:
+        mes = message.text
+        if mes == 'Создать новую запись в БД':
+            msg = bot.send_message(message.chat.id, 'Введите вопрос')
+            bot.register_next_step_handler(msg, admin_panel_create_question)
+        elif mes == 'Удалить запись из БД':
+            bot.send_message(message.chat.id, 'Ой...')
+        elif mes == 'Выйти':
+            msg = bot.send_message(message.chat.id, 'Вы вышли из админ панели')
+            bot.register_next_step_handler(msg, send_text)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+def admin_panel_create_question(message):
+    try:
+        datab_id = message.from_user.id
+        datab_data[datab_id] = Datab(message.text)
+
+        Datab.question = message.text
+        msg = bot.send_message(message.chat.id, 'Введите ответ')
+        bot.register_next_step_handler(msg, admin_panel_create_answer)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+def admin_panel_create_answer(message):
+    try:
+        datab_id = message.from_user.id
+        datab_data[datab_id] = Datab(message.text)
+
+
+
+        datab_id = message.from_user.id
+        datab = datab_data[datab_id]
+        datab.answer = message.text
+
+        sql = "INSERT INTO articles (question, answer) \
+                                          VALUES (%s, %s)"
+        val = (Datab.question, datab.answer)
+        cursor.execute(sql, val)
+        db.commit()
+        msg = bot.send_message(message.chat.id, 'Запись добавленна', reply_markup=cfg.kb_admc)
+        bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 bot.polling()
 
