@@ -17,15 +17,18 @@ datab_data = {}
 user_data = {}
 name = ''
 
+
 class Datab:
     def __init__(self, question):
         self.question = question
         self.answer = ''
 
+
 class User:
     def __init__(self, first_name):
         self.first_name = first_name
         self.last_name = ''
+
 
 @bot.message_handler(commands=['start', 'help', 'reg','adm', 'rereg'])
 def start_help_message(message):
@@ -50,6 +53,7 @@ def start_help_message(message):
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
+
 def reg_firstname_step(message):
     try:
         user_id = message.from_user.id
@@ -59,6 +63,7 @@ def reg_firstname_step(message):
         bot.register_next_step_handler(msg, reg_lastname_step)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
 
 def reg_lastname_step(message):
     try:
@@ -76,6 +81,7 @@ def reg_lastname_step(message):
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
+
 def rereg_firstname_step(message):
     try:
         user_id = message.from_user.id
@@ -85,6 +91,7 @@ def rereg_firstname_step(message):
         bot.register_next_step_handler(msg, rereg_lastname_step)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
 
 def rereg_lastname_step(message):
     user_id = message.from_user.id
@@ -97,6 +104,7 @@ def rereg_lastname_step(message):
     db.commit()
 
     bot.send_message(message.chat.id, "Вы успешно перерегистрированны!")
+
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
@@ -119,6 +127,7 @@ def send_text(message):
     except Exception as e :
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
+
 @bot.message_handler(content_types=['text'])
 def admin_panel(message):
     try:
@@ -130,6 +139,7 @@ def admin_panel(message):
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
+
 def admin_panel_what(message):
     try:
         mes = message.text
@@ -139,11 +149,20 @@ def admin_panel_what(message):
         elif mes == 'Удалить запись из БД':
             msg = bot.send_message(message.chat.id, 'Введите id записи которую хотите удалить')
             bot.register_next_step_handler(msg, admin_panel_delete)
+        elif mes == 'Просмотреть все записи':
+            msg = bot.send_message(message.chat.id, 'Все записи из таблицы articles\n'
+                                              'id         Вопрос        Ответ', reply_markup=cfg.kb_admc)
+            cursor.execute('SELECT * FROM articles ORDER BY id')
+            rows = cursor.fetchall()
+            for row in rows:
+                bot.send_message(message.chat.id, '{}'.format(row))
+            bot.register_next_step_handler(msg, admin_panel_what)
         elif mes == 'Выйти':
             msg = bot.send_message(message.chat.id, 'Вы вышли из админ панели')
             bot.register_next_step_handler(msg, send_text)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
 
 def admin_panel_create_question(message):
     try:
@@ -155,6 +174,7 @@ def admin_panel_create_question(message):
         bot.register_next_step_handler(msg, admin_panel_create_answer)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
 
 def admin_panel_create_answer(message):
     try:
@@ -177,22 +197,24 @@ def admin_panel_create_answer(message):
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
+
 def admin_panel_delete(message):
     try:
         id = message.text
         sql = 'SELECT * FROM articles WHERE id = %s'
         val = (id, )
         cursor.execute(sql, val)
-        entry = cursor.fetchone()
-        id_print = entry[0]
-        question_print = entry[1]
-        answer_print = entry[2]
+        record = cursor.fetchone()
+        id_print = record[0]
+        question_print = record[1]
+        answer_print = record[2]
         bot.send_message(message.chat.id, 'id: {}\nquestion: {}\nanswer: {}'.format(id_print, question_print, answer_print))
         msg = bot.send_message(message.chat.id, 'Вы уверены что хотите удалить эту запись?', reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, admin_panel_delete2)
     except Exception as e:
         msg = bot.send_message(message.chat.id, 'Запись не найдена, попробуйте ещё раз', reply_markup=cfg.kb_admc)
         bot.register_next_step_handler(msg, admin_panel_what)
+
 
 def admin_panel_delete2(message):
     try:
@@ -205,6 +227,7 @@ def admin_panel_delete2(message):
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
+
 def admin_panel_delete3(message):
     try:
         id = message.text
@@ -216,5 +239,6 @@ def admin_panel_delete3(message):
         bot.register_next_step_handler(msg, admin_panel_what)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
 
 bot.polling()
