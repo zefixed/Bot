@@ -218,4 +218,3 @@ def admin_panel_delete3(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 bot.polling()
-
