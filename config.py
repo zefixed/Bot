@@ -11,4 +11,7 @@ kb_admc.row('Создать новую запись в БД', 'Удалить з
 kb_adm = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_adm.row('/adm')
 
+kb_yes_no = telebot.types.ReplyKeyboardMarkup(True, True)
+kb_yes_no.row('Да', 'Нет')
+
 adm = 'f297a57a5a743894a0e4a801fc3'
