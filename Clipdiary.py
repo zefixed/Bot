@@ -101,7 +101,85 @@ def admin_panel_create_question(message):
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 #-----------------------------------------------------------------------------------------------------------------------
+
+
+def admin_panel_create_question(message):
+    try:
+        datab_id = message.from_user.id
+        datab_data[datab_id] = Datab(message.text)
+
+        Datab.question = message.text
+        msg = bot.send_message(message.chat.id, 'Введите ответ')
+        bot.register_next_step_handler(msg, admin_panel_create_answer)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_create_answer(message):
+    try:
+        datab_id = message.from_user.id
+        datab_data[datab_id] = Datab(message.text)
+
+
+
+        datab_id = message.from_user.id
+        datab = datab_data[datab_id]
+        datab.answer = message.text
+
+        sql = "INSERT INTO radicalpowerlogarithm (question, answer) \
+                                          VALUES (%s, %s)"
+        val = (Datab.question, datab.answer)
+        cursor.execute(sql, val)
+        db.commit()
+        msg = bot.send_message(message.chat.id, 'Запись добавленна', reply_markup=cfg.kb_admc)
+        bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 #-----------------------------------------------------------------------------------------------------------------------
+
+
+def admin_panel_delete(message):
+    try:
+        id = message.text
+        sql = 'SELECT * FROM articles WHERE id = %s'
+        val = (id, )
+        cursor.execute(sql, val)
+        record = cursor.fetchone()
+        id_print = record[0]
+        question_print = record[1]
+        answer_print = record[2]
+        bot.send_message(message.chat.id, 'id: {}\nquestion: {}\nanswer: {}'.format(id_print, question_print, answer_print))
+        msg = bot.send_message(message.chat.id, 'Вы уверены что хотите удалить эту запись?', reply_markup=cfg.kb_yes_no)
+        bot.register_next_step_handler(msg, admin_panel_delete2)
+    except Exception as e:
+        msg = bot.send_message(message.chat.id, 'Запись не найдена, попробуйте ещё раз', reply_markup=cfg.kb_admc)
+        bot.register_next_step_handler(msg, admin_panel_what)
+
+
+def admin_panel_delete2(message):
+    try:
+        if message.text == 'Да':
+            msg = bot.send_message(message.chat.id, 'Подтвердите удаление (Напишите ещё раз id удаляемой записи)')
+            bot.register_next_step_handler(msg, admin_panel_delete3)
+        elif message.text == 'Нет':
+            msg = bot.send_message(message.chat.id, 'Попробуйте заново', reply_markup=cfg.kb_admc)
+            bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_delete3(message):
+    try:
+        id = message.text
+        sql = 'DELETE FROM articles WHERE id = %s'
+        val = (id,)
+        cursor.execute(sql, val)
+        db.commit()
+        msg = bot.send_message(message.chat.id, 'Запись успешно удалена', reply_markup=cfg.kb_admc)
+        bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
 #-----------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------
