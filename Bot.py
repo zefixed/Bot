@@ -144,19 +144,14 @@ def admin_panel_what(message):
     try:
         mes = message.text
         if mes == 'Создать новую запись в БД':
-            msg = bot.send_message(message.chat.id, 'Введите вопрос')
-            bot.register_next_step_handler(msg, admin_panel_create_question)
+            msg = bot.send_message(message.chat.id, 'В какую БД добавлять запись?', reply_markup=cfg.kb_admbd)
+            bot.register_next_step_handler(msg, admin_panel_db_selection_create)
         elif mes == 'Удалить запись из БД':
-            msg = bot.send_message(message.chat.id, 'Введите id записи которую хотите удалить')
-            bot.register_next_step_handler(msg, admin_panel_delete)
+            msg = bot.send_message(message.chat.id, 'Из какой БД удалять запись', reply_markup=cfg.kb_admbd)
+            bot.register_next_step_handler(msg, admin_panel_db_selection_delete)
         elif mes == 'Просмотреть все записи':
-            msg = bot.send_message(message.chat.id, 'Все записи из таблицы articles\n'
-                                              'id         Вопрос        Ответ', reply_markup=cfg.kb_admc)
-            cursor.execute('SELECT * FROM articles ORDER BY id')
-            rows = cursor.fetchall()
-            for row in rows:
-                bot.send_message(message.chat.id, '{}'.format(row))
-            bot.register_next_step_handler(msg, admin_panel_what)
+            msg = bot.send_message(message.chat.id, 'Записи какой таблицы вы хотите просмотреть?', reply_markup=cfg.kb_admbd)
+            bot.register_next_step_handler(msg, admin_panel_db_view)
         elif mes == 'Выйти':
             msg = bot.send_message(message.chat.id, 'Вы вышли из админ панели')
             bot.register_next_step_handler(msg, send_text)
@@ -164,19 +159,82 @@ def admin_panel_what(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-def admin_panel_create_question(message):
+def admin_panel_db_view(message):
+    try:
+        if message.text == 'radicalpowerlogarithm':
+            msg = bot.send_message(message.chat.id, 'Все записи из таблицы radicalpowerlogarithm\n'
+                                              'id\nВопрос\nОтвет', reply_markup=cfg.kb_admc)
+            cursor.execute('SELECT * FROM radicalpowerlogarithm ORDER BY id')
+            rows = cursor.fetchall()
+            for row in rows:
+                r1 = row[0]
+                r2 = row[1]
+                r3 = row[2]
+                bot.send_message(message.chat.id, '{}\n------------------------------\n{}\n------------------------------\n{}'.format(r1, r2, r3))
+            bot.register_next_step_handler(msg, admin_panel_what)
+        elif message.text == 'trigonometry':
+            msg = bot.send_message(message.chat.id, 'Все записи из таблицы trigonometry\n'
+                                                    'id         Вопрос        Ответ', reply_markup=cfg.kb_admc)
+            cursor.execute('SELECT * FROM trigonometry ORDER BY id')
+            rows = cursor.fetchall()
+            for row in rows:
+                r1 = row[0]
+                r2 = row[1]
+                r3 = row[2]
+                bot.send_message(message.chat.id, '{}\n------------------------------\n{}\n------------------------------\n{}'.format(r1, r2, r3))
+            bot.register_next_step_handler(msg, admin_panel_what)
+        elif message.text == 'smth':
+            msg = bot.send_message(message.chat.id, 'Не работает', reply_markup=cfg.kb_admc)
+            bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_db_selection_create(message):
+    try:
+        if message.text =='radicalpowerlogarithm':
+            msg = bot.send_message(message.chat.id, 'Введите вопрос')
+            bot.register_next_step_handler(msg, admin_panel_create_question_radicalpowerlogarithm)
+        elif message.text =='trigonometry':
+            msg = bot.send_message(message.chat.id, 'Введите вопрос')
+            bot.register_next_step_handler(msg, admin_panel_create_question_trigonometry)
+        elif message.text == 'smth':
+            msg = bot.send_message(message.chat.id, 'Не работает', reply_markup=cfg.kb_admc)
+            bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_db_selection_delete(message):
+    try:
+        if message.text =='radicalpowerlogarithm':
+            msg = bot.send_message(message.chat.id, 'Введите id записи которую хотите удалить')
+            bot.register_next_step_handler(msg, admin_panel_delete_radicalpowerlogarithm)
+        elif message.text =='trigonometry':
+            msg = bot.send_message(message.chat.id, 'Введите id записи которую хотите удалить')
+            bot.register_next_step_handler(msg, admin_panel_delete_trigonometry)
+        elif message.text == 'smth':
+            msg = bot.send_message(message.chat.id, 'Не работает', reply_markup=cfg.kb_admc)
+            bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_create_question_radicalpowerlogarithm(message):
     try:
         datab_id = message.from_user.id
         datab_data[datab_id] = Datab(message.text)
 
         Datab.question = message.text
         msg = bot.send_message(message.chat.id, 'Введите ответ')
-        bot.register_next_step_handler(msg, admin_panel_create_answer)
+        bot.register_next_step_handler(msg, admin_panel_create_answer_radicalpowerlogarithm)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-def admin_panel_create_answer(message):
+def admin_panel_create_answer_radicalpowerlogarithm(message):
     try:
         datab_id = message.from_user.id
         datab_data[datab_id] = Datab(message.text)
@@ -187,7 +245,7 @@ def admin_panel_create_answer(message):
         datab = datab_data[datab_id]
         datab.answer = message.text
 
-        sql = "INSERT INTO articles (question, answer) \
+        sql = "INSERT INTO radicalpowerlogarithm (question, answer) \
                                           VALUES (%s, %s)"
         val = (Datab.question, datab.answer)
         cursor.execute(sql, val)
@@ -198,10 +256,44 @@ def admin_panel_create_answer(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-def admin_panel_delete(message):
+def admin_panel_create_question_trigonometry(message):
+    try:
+        datab_id = message.from_user.id
+        datab_data[datab_id] = Datab(message.text)
+
+        Datab.question = message.text
+        msg = bot.send_message(message.chat.id, 'Введите ответ')
+        bot.register_next_step_handler(msg, admin_panel_create_answer_trigonometry)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_create_answer_trigonometry(message):
+    try:
+        datab_id = message.from_user.id
+        datab_data[datab_id] = Datab(message.text)
+
+
+
+        datab_id = message.from_user.id
+        datab = datab_data[datab_id]
+        datab.answer = message.text
+
+        sql = "INSERT INTO trigonometry (question, answer) \
+                                          VALUES (%s, %s)"
+        val = (Datab.question, datab.answer)
+        cursor.execute(sql, val)
+        db.commit()
+        msg = bot.send_message(message.chat.id, 'Запись добавленна', reply_markup=cfg.kb_admc)
+        bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_delete_radicalpowerlogarithm(message):
     try:
         id = message.text
-        sql = 'SELECT * FROM articles WHERE id = %s'
+        sql = 'SELECT * FROM radicalpowerlogarithm WHERE id = %s'
         val = (id, )
         cursor.execute(sql, val)
         record = cursor.fetchone()
@@ -210,17 +302,17 @@ def admin_panel_delete(message):
         answer_print = record[2]
         bot.send_message(message.chat.id, 'id: {}\nquestion: {}\nanswer: {}'.format(id_print, question_print, answer_print))
         msg = bot.send_message(message.chat.id, 'Вы уверены что хотите удалить эту запись?', reply_markup=cfg.kb_yes_no)
-        bot.register_next_step_handler(msg, admin_panel_delete2)
+        bot.register_next_step_handler(msg, admin_panel_delete2_radicalpowerlogarithm)
     except Exception as e:
         msg = bot.send_message(message.chat.id, 'Запись не найдена, попробуйте ещё раз', reply_markup=cfg.kb_admc)
         bot.register_next_step_handler(msg, admin_panel_what)
 
 
-def admin_panel_delete2(message):
+def admin_panel_delete2_radicalpowerlogarithm(message):
     try:
         if message.text == 'Да':
-            msg = bot.send_message(message.chat.id, 'Подтвердите удаление (Напииште ещё раз id удаляемой записи)')
-            bot.register_next_step_handler(msg, admin_panel_delete3)
+            msg = bot.send_message(message.chat.id, 'Подтвердите удаление (Напишите ещё раз id удаляемой записи)')
+            bot.register_next_step_handler(msg, admin_panel_delete3_radicalpowerlogarithm)
         elif message.text == 'Нет':
             msg = bot.send_message(message.chat.id, 'Попробуйте заново', reply_markup=cfg.kb_admc)
             bot.register_next_step_handler(msg, admin_panel_what)
@@ -228,10 +320,53 @@ def admin_panel_delete2(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-def admin_panel_delete3(message):
+def admin_panel_delete3_radicalpowerlogarithm(message):
     try:
         id = message.text
-        sql = 'DELETE FROM articles WHERE id = %s'
+        sql = 'DELETE FROM radicalpowerlogarithm WHERE id = %s'
+        val = (id,)
+        cursor.execute(sql, val)
+        db.commit()
+        msg = bot.send_message(message.chat.id, 'Запись успешно удалена', reply_markup=cfg.kb_admc)
+        bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_delete_trigonometry(message):
+    try:
+        id = message.text
+        sql = 'SELECT * FROM trigonometry WHERE id = %s'
+        val = (id, )
+        cursor.execute(sql, val)
+        record = cursor.fetchone()
+        id_print = record[0]
+        question_print = record[1]
+        answer_print = record[2]
+        bot.send_message(message.chat.id, 'id: {}\nquestion: {}\nanswer: {}'.format(id_print, question_print, answer_print))
+        msg = bot.send_message(message.chat.id, 'Вы уверены что хотите удалить эту запись?', reply_markup=cfg.kb_yes_no)
+        bot.register_next_step_handler(msg, admin_panel_delete2_trigonometry)
+    except Exception as e:
+        msg = bot.send_message(message.chat.id, 'Запись не найдена, попробуйте ещё раз', reply_markup=cfg.kb_admc)
+        bot.register_next_step_handler(msg, admin_panel_what)
+
+
+def admin_panel_delete2_trigonometry(message):
+    try:
+        if message.text == 'Да':
+            msg = bot.send_message(message.chat.id, 'Подтвердите удаление (Напишите ещё раз id удаляемой записи)')
+            bot.register_next_step_handler(msg, admin_panel_delete3_trigonometry)
+        elif message.text == 'Нет':
+            msg = bot.send_message(message.chat.id, 'Попробуйте заново', reply_markup=cfg.kb_admc)
+            bot.register_next_step_handler(msg, admin_panel_what)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def admin_panel_delete3_trigonometry(message):
+    try:
+        id = message.text
+        sql = 'DELETE FROM trigonometry WHERE id = %s'
         val = (id,)
         cursor.execute(sql, val)
         db.commit()
