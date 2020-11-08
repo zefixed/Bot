@@ -17,4 +17,13 @@ kb_adm.row('/adm')
 kb_yes_no = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_yes_no.row('Да', 'Нет')
 
+kb_fb = telebot.types.ReplyKeyboardMarkup(True, True)
+kb_fb.row('Проблема', 'Пожелание')
+
+kb_ask = telebot.types.ReplyKeyboardMarkup(True, True)
+kb_ask.row('Просмотреть список доступных вопросов', 'Написать вручную')
+
+kb_ask_t = telebot.types.ReplyKeyboardMarkup(True, True)
+kb_ask_t.row('Корни, степени, логарифмы', 'Тригонометрия')
+
 adm = 'f297a57a5a743894a0e4a801fc3'
