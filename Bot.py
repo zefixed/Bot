@@ -17,7 +17,6 @@ datab_data = {}
 user_data = {}
 name = ''
 
-
 class Datab:
     def __init__(self, question):
         self.question = question
@@ -30,26 +29,153 @@ class User:
         self.last_name = ''
 
 
-@bot.message_handler(commands=['start', 'help', 'reg','adm', 'rereg'])
+@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'adm', 'feedback'])
 def start_help_message(message):
     try:
         if message.text == '/start':
             bot.send_message(message.chat.id, 'Привет, если не знаешь как мной пользоваться или ты тут в первый раз можешь написать /help для просмотра доступных команд', reply_markup=cfg.kb)
+        elif message.text == '/ask':
+            msg = bot.send_message(message.chat.id, 'Вы можете просмотреть список доступных вопросов (не рекомендуется) или задать вопрос вручную', reply_markup=cfg.kb_ask)
+            bot.register_next_step_handler(msg, ask_start)
         elif message.text == '/help':
-            bot.send_message(message.chat.id, 'Доступные команду\n'
+            bot.send_message(message.chat.id, 'Доступные команды\n'
                                               '1. /start (Используется для начала общения со мной)\n'
-                                              '2. /help (Показывает известные мне команды)\n'
-                                              '3. /reg (Позволяет мне обращаться к тебе по имени)\n'
-                                              '4. /rereg (Позволяет перерегистрироваться)\n')
+                                              '2. /ask (Позволяет задать мне вопрос)\n'
+                                              '3. /help (Показывает известные мне команды)\n'
+                                              '4. /reg (Позволяет мне обращаться к тебе по имени)\n'
+                                              '5. /rereg (Позволяет перерегистрироваться)\n'
+                                              '6. /info (Показывает информацию обо мне)\n'
+                                              '7. /feedback (Позволяет сообщить об ошибке или предложить нововведение)')
         elif message.text == '/reg':
             name = bot.send_message(message.chat.id, 'Введите имя')
             bot.register_next_step_handler(name, reg_firstname_step)
-        elif message.text == '/adm':
-            adm = bot.send_message(message.chat.id, 'Введите пароль')
-            bot.register_next_step_handler(adm, admin_panel)
         elif message.text == '/rereg':
             name = bot.send_message(message.chat.id, 'Введите имя')
             bot.register_next_step_handler(name, rereg_firstname_step)
+        elif message.text == '/info':
+            bot.send_message(message.chat.id, 'Я бот *Не забыть вставить имя*.\n'
+                                               'Я был создан для того чтобы помочь тебе в повторении материала по школьным предметам.\n'
+                                               'Пока что я могу помочь тебе только по математике 8-11 классов. \n'
+                                               'Мои разработчики стараются над введением новых вопросов, если ты хочешь помочь им или нашёл какой-то недочёт в моей работе, пожалуйста, напиши им об этом с помощью /feedback')
+        elif message.text == '/adm':
+            adm = bot.send_message(message.chat.id, 'Введите пароль')
+            bot.register_next_step_handler(adm, admin_panel)
+        elif message.text == '/feedback':
+            msg = bot.send_message(message.chat.id, 'О чём вы бы хотели сообщить?', reply_markup=cfg.kb_fb)
+            bot.register_next_step_handler(msg, feedback_start)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def ask_start(message):
+    try:
+        if message.text == 'Просмотреть список доступных вопросов':
+            msg = bot.send_message(message.chat.id, 'Вопросы какой категории вы бы хотели просмотреть?', reply_markup=cfg.kb_ask_t)
+            bot.register_next_step_handler(msg, ask_viev)
+        elif message.text == 'Написать вручную':
+            msg = bot.send_message(message.chat.id, 'Вопрос какой категории вы бы хотели задать?', reply_markup=cfg.kb_ask_t)
+            bot.register_next_step_handler(msg, ask_set_table)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def ask_viev(message):
+    try:
+        if message.text == 'Корни, степени, логарифмы':
+            cursor.execute('SELECT * FROM radicalpowerlogarithm ORDER BY id')
+            rows = cursor.fetchall()
+            for row in rows:
+                r2 = row[1]
+                bot.send_message(message.chat.id,'{}'.format(r2))
+            msg = bot.send_message(message.chat.id, 'Для повторного задания вопроса воспользуётесь /ask')
+            bot.register_next_step_handler(msg, start_help_message)
+        elif message.text == 'Тригонометрия':
+            cursor.execute('SELECT * FROM trigonometry ORDER BY id')
+            rows = cursor.fetchall()
+            for row in rows:
+                r2 = row[1]
+                bot.send_message(message.chat.id, '{}'.format(r2))
+            msg = bot.send_message(message.chat.id, 'Для повторного задания вопроса воспользуётесь /ask')
+            bot.register_next_step_handler(msg, start_help_message)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def ask_set_table(message):
+    try:
+        if message.text == 'Корни, степени, логарифмы':
+            msg = bot.send_message(message.chat.id,'Введите вопрос')
+            bot.register_next_step_handler(msg, ask_set_question_radicalpowerlogarithm)
+        elif message.text == 'Тригонометрия':
+            msg = bot.send_message(message.chat.id, 'Введите вопрос')
+            bot.register_next_step_handler(msg, ask_set_question_trigonometry)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+# def ask_set_question_radicalpowerlogarithm(message):
+#     try:
+#         question = message.text
+#         answer = cursor.execute('SELECT answer FROM radicalpowerlogarithm WHERE MATCH (question) AGAINST (question);')
+#         ans = answer[0]
+#         msg = bot.send_message(message.chat.id, '{}'.format(ans))
+#         bot.register_next_step_handler(msg, start_help_message)
+#     except Exception as e:
+#         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+#
+#
+# def ask_set_question_trigonometry(message):
+#     try:
+#         question = message.text
+#         answer = cursor.execute("SELECT answer FROM trigonometry WHERE MATCH (`question`) AGAINST('*ину*' IN BOOLEAN MODE)")
+#         print(answer)
+#         # ans = answer[0]
+#         # msg = bot.send_message(message.chat.id, '{}'.format(ans))
+#         # bot.register_next_step_handler(msg, start_help_message)
+#     except Exception as e:
+#         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def feedback_start(message):
+    try:
+        if message.text == 'Проблема':
+            msg = bot.send_message(message.chat.id, 'Опишите проблему')
+            bot.register_next_step_handler(msg, feedback_problem)
+        elif message.text == 'Пожелание':
+            msg = bot.send_message(message.chat.id, 'Напишите пожелание')
+            bot.register_next_step_handler(msg, feedback_request)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def feedback_problem(message):
+    try:
+        user_id = message.from_user.id
+        problem = message.text
+
+        sql = "INSERT INTO feedback (problem, user_id) VALUES (%s, %s)"
+        val = (problem, user_id)
+        cursor.execute(sql, val)
+        db.commit()
+
+        msg = bot.send_message(message.chat.id, 'Проблема в кротчайшие сроки будет исправлена')
+        bot.register_next_step_handler(msg, start_help_message)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def feedback_request(message):
+    try:
+        user_id = message.from_user.id
+        request = message.text
+
+        sql = "INSERT INTO feedback (request, user_id) VALUES (%s, %s)"
+        val = (request, user_id)
+        cursor.execute(sql, val)
+        db.commit()
+
+        msg= bot.send_message(message.chat.id, 'Мы учтём ваше пожелание')
+        bot.register_next_step_handler(msg, start_help_message)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
