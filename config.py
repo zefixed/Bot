@@ -8,6 +8,9 @@ kb.row('Привет', 'Пока')
 kb_admc = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_admc.row('Создать новую запись в БД','Удалить запись из БД').add('Просмотреть все записи', 'Выйти')
 
+kb_admbd = telebot.types.ReplyKeyboardMarkup(True, True)
+kb_admbd.row('radicalpowerlogarithm','trigonometry').add('smth', 'smth').add('smth')
+
 kb_adm = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_adm.row('/adm')
 
