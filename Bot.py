@@ -17,6 +17,7 @@ datab_data = {}
 user_data = {}
 name = ''
 
+
 class Datab:
     def __init__(self, question):
         self.question = question
@@ -82,7 +83,7 @@ def ask_start(message):
 def ask_viev(message):
     try:
         if message.text == 'Корни, степени, логарифмы':
-            cursor.execute('SELECT * FROM radicalpowerlogarithm ORDER BY id')
+            cursor.execute('SELECT * FROM radical_power_logarithm ORDER BY id')
             rows = cursor.fetchall()
             for row in rows:
                 r2 = row[1]
@@ -105,7 +106,7 @@ def ask_set_table(message):
     try:
         if message.text == 'Корни, степени, логарифмы':
             msg = bot.send_message(message.chat.id,'Введите вопрос')
-            bot.register_next_step_handler(msg, ask_set_question_radicalpowerlogarithm)
+            bot.register_next_step_handler(msg, ask_set_question_radical_power_logarithm)
         elif message.text == 'Тригонометрия':
             msg = bot.send_message(message.chat.id, 'Введите вопрос')
             bot.register_next_step_handler(msg, ask_set_question_trigonometry)
@@ -113,12 +114,15 @@ def ask_set_table(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-# def ask_set_question_radicalpowerlogarithm(message):
+# def ask_set_question_radical_power_logarithm(message):
 #     try:
 #         question = message.text
-#         answer = cursor.execute('SELECT answer FROM radicalpowerlogarithm WHERE MATCH (question) AGAINST (question);')
-#         ans = answer[0]
-#         msg = bot.send_message(message.chat.id, '{}'.format(ans))
+#         sql = 'SELECT answer FROM radical_power_logarithm WHERE MATCH (question) AGAINST (%s)'
+#         val = (question, )
+#         answer = cursor.execute(sql, val)
+#
+#         print(answer, question)
+#         msg = bot.send_message(message.chat.id, '{}'.format(answer))
 #         bot.register_next_step_handler(msg, start_help_message)
 #     except Exception as e:
 #         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
@@ -287,10 +291,10 @@ def admin_panel_what(message):
 
 def admin_panel_db_view(message):
     try:
-        if message.text == 'radicalpowerlogarithm':
-            msg = bot.send_message(message.chat.id, 'Все записи из таблицы radicalpowerlogarithm\n'
+        if message.text == 'radical_power_logarithm':
+            msg = bot.send_message(message.chat.id, 'Все записи из таблицы radical_power_logarithm\n'
                                               'id\nВопрос\nОтвет', reply_markup=cfg.kb_admc)
-            cursor.execute('SELECT * FROM radicalpowerlogarithm ORDER BY id')
+            cursor.execute('SELECT * FROM radical_power_logarithm ORDER BY id')
             rows = cursor.fetchall()
             for row in rows:
                 r1 = row[0]
@@ -320,7 +324,7 @@ def admin_panel_db_view(message):
 
 def admin_panel_db_selection_create(message):
     try:
-        if message.text =='radicalpowerlogarithm':
+        if message.text =='radical_power_logarithm':
             msg = bot.send_message(message.chat.id, 'Введите вопрос')
             bot.register_next_step_handler(msg, admin_panel_create_question_radicalpowerlogarithm)
         elif message.text =='trigonometry':
@@ -335,7 +339,7 @@ def admin_panel_db_selection_create(message):
 
 def admin_panel_db_selection_delete(message):
     try:
-        if message.text =='radicalpowerlogarithm':
+        if message.text =='radical_power_logarithm':
             msg = bot.send_message(message.chat.id, 'Введите id записи которую хотите удалить')
             bot.register_next_step_handler(msg, admin_panel_delete_radicalpowerlogarithm)
         elif message.text =='trigonometry':
@@ -371,7 +375,7 @@ def admin_panel_create_answer_radicalpowerlogarithm(message):
         datab = datab_data[datab_id]
         datab.answer = message.text
 
-        sql = "INSERT INTO radicalpowerlogarithm (question, answer) \
+        sql = "INSERT INTO radical_power_logarithm (question, answer) \
                                           VALUES (%s, %s)"
         val = (Datab.question, datab.answer)
         cursor.execute(sql, val)
@@ -419,7 +423,7 @@ def admin_panel_create_answer_trigonometry(message):
 def admin_panel_delete_radicalpowerlogarithm(message):
     try:
         id = message.text
-        sql = 'SELECT * FROM radicalpowerlogarithm WHERE id = %s'
+        sql = 'SELECT * FROM radical_power_logarithm WHERE id = %s'
         val = (id, )
         cursor.execute(sql, val)
         record = cursor.fetchone()
@@ -449,7 +453,7 @@ def admin_panel_delete2_radicalpowerlogarithm(message):
 def admin_panel_delete3_radicalpowerlogarithm(message):
     try:
         id = message.text
-        sql = 'DELETE FROM radicalpowerlogarithm WHERE id = %s'
+        sql = 'DELETE FROM radical_powerlogarithm WHERE id = %s'
         val = (id,)
         cursor.execute(sql, val)
         db.commit()
