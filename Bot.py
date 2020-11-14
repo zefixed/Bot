@@ -115,7 +115,7 @@ def ask_viev(message):
                 bot.send_message(message.chat.id, '{}'.format(r2))
             msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?', reply_markup=cfg.kb_yes_no)
             bot.register_next_step_handler(msg, ask_except)
-        elif message.text == 'Алгебраические понятия и интересные Вопросы':
+        elif message.text == 'Алгебраические понятия и интересные вопросы':
             cursor.execute('SELECT * FROM algebraic_concepts ORDER BY id')
             rows = cursor.fetchall()
             for row in rows:
@@ -141,7 +141,7 @@ def ask_set_table(message):
         elif message.text == 'Геометрические понятия':
             msg = bot.send_message(message.chat.id, 'Введите вопрос')
             bot.register_next_step_handler(msg, ask_set_question_geometric_concepts)
-        elif message.text == 'Алгебраические понятия и интересные Вопросы':
+        elif message.text == 'Алгебраические понятия и интересные вопросы':
             msg = bot.send_message(message.chat.id, 'Введите вопрос')
             bot.register_next_step_handler(msg, ask_set_question_algebraic_concepts)
     except Exception as e:
