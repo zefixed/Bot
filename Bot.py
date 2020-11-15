@@ -75,10 +75,20 @@ def start_help_message(message):
 def easter_egg(message):
     try:
         if message.text == 'Дать печеньку':
-            user_id == message.from_user.id
-            cursor.execute(inser)
+            cursor.execute('SELECT cookies FROM easter_egg WHERE id = 1')
+            cookies = cursor.fetchall()
+            count = cookies[0]
+            count_old = count = count[0]
+            count +=1
+            sql = ('UPDATE easter_egg SET cookies = %s WHERE cookies = %s')
+            val = (count, count_old)
+            cursor.execute(sql, val)
+            db.commit()
+            msg = bot.send_message(message.chat.id, 'Всего печенек, {}'.format(count), reply_markup=cfg.kb_cookie)
+            bot.register_next_step_handler(msg, easter_egg)
         elif message.text == 'Выйти':
-
+            msg = bot.send_message(message.chat.id, 'Вы можете выбрать функцию или просмотрите список доступных /help')
+            bot.register_next_step_handler(msg, start_help_message)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
@@ -328,7 +338,8 @@ def reg_lastname_step(message):
         cursor.execute(sql, val)
         db.commit()
 
-        bot.send_message(message.chat.id, "Вы успешно зарегистрированны!")
+        msg = bot.send_message(message.chat.id, "Вы успешно зарегистрированны!")
+        bot.register_next_step_handler(msg, start_help_message)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
