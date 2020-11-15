@@ -6,6 +6,9 @@ token_old = '1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY'
 kb = telebot.types.ReplyKeyboardMarkup(True, True)
 kb.row('Привет', 'Пока')
 
+kb_cookie = telebot.types.ReplyKeyboardMarkup(True, True)
+kb_cookie.row('Дать печеньку', 'Выйти')
+
 kb_admc = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_admc.row('Создать новую запись в БД', 'Удалить запись из БД').add('Просмотреть все записи', 'Выйти')
 
