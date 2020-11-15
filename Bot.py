@@ -31,7 +31,7 @@ class User:
         self.last_name = ''
 
 
-@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'adm', 'feedback'])
+@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'adm', 'feedback', 'cookie'])
 def start_help_message(message):
     try:
         if message.text == '/start':
@@ -65,6 +65,20 @@ def start_help_message(message):
         elif message.text == '/feedback':
             msg = bot.send_message(message.chat.id, 'О чём вы бы хотели сообщить?', reply_markup=cfg.kb_fb)
             bot.register_next_step_handler(msg, feedback_start)
+        elif message.text == '/cookie':
+            msg = bot.send_message(message.chat.id, 'Покормить разработчиков', reply_markup=cfg.kb_cookie)
+            bot.register_next_step_handler(msg, easter_egg)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def easter_egg(message):
+    try:
+        if message.text == 'Дать печеньку':
+            user_id == message.from_user.id
+            cursor.execute(inser)
+        elif message.text == 'Выйти':
+
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
