@@ -18,7 +18,6 @@ user_data = {}
 name = ''
 question = ''
 
-
 class Datab:
     def __init__(self, question):
         self.question = question
@@ -178,13 +177,11 @@ def ask_set_question_radical_power_logarithm(message):
         sql = "SELECT answer, edu_mat FROM radical_power_logarithm WHERE question LIKE '%"+question+"%'"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
-        for rows in all_rows:
-            answer = rows[0]
-            edu_mat = rows[1]
-        print(all_rows)
-        bot.send_message(message.chat.id, '{}'.format(answer))
-        bot.send_message(message.chat.id, 'Дополнительные образовательные материалы по данному вопросу вы можете найти по ссылке '
-                                          '{}'.format(edu_mat))
+        row = all_rows[0]
+        bot.send_message(message.chat.id, '{}'.format(row[0]))
+        bot.send_message(message.chat.id,
+                         'Дополнительные образовательные материалы по данному вопросу вы можете найти по ссылке '
+                         '{}'.format(row[1]))
         msg = bot.send_message(message.chat.id, 'Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
@@ -196,39 +193,34 @@ def ask_set_question_radical_power_logarithm(message):
 def ask_set_question_trigonometry(message):
     try:
         question = message.text
-        sql = "SELECT answer FROM trigonometry WHERE question LIKE '%" + question + "%'"
+        sql = "SELECT answer, edu_mat FROM trigonometry WHERE question LIKE '%" + question + "%'"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
-        for rows in all_rows:
-            answer = rows[0]
-            edu_mat = rows[1]
-        print(all_rows)
-        bot.send_message(message.chat.id, '{}'.format(answer))
+        row = all_rows[0]
+        bot.send_message(message.chat.id, '{}'.format(row[0]))
         bot.send_message(message.chat.id,
                          'Дополнительные образовательные материалы по данному вопросу вы можете найти по ссылке '
-                         '{}'.format(edu_mat))
+                         '{}'.format(row[1]))
         msg = bot.send_message(message.chat.id, 'Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
         msg = bot.send_message(message.chat.id,
-                         'Ошибка, ответ на ваш вопрос не найден. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
+                               'Ошибка, ответ на ваш вопрос не найден. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?',
+                               reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
 
 
 def ask_set_question_probability_theory(message):
     try:
         question = message.text
-        sql = "SELECT answer FROM probability_theory WHERE question LIKE '%" + question + "%'"
+        sql = "SELECT answer, edu_mat FROM probability_theory WHERE question LIKE '%" + question + "%'"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
-        for rows in all_rows:
-            answer = rows[0]
-            edu_mat = rows[1]
-        print(all_rows)
-        bot.send_message(message.chat.id, '{}'.format(answer))
+        row = all_rows[0]
+        bot.send_message(message.chat.id, '{}'.format(row[0]))
         bot.send_message(message.chat.id,
                          'Дополнительные образовательные материалы по данному вопросу вы можете найти по ссылке '
-                         '{}'.format(edu_mat))
+                         '{}'.format(row[1]))
         msg = bot.send_message(message.chat.id, 'Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
@@ -240,17 +232,14 @@ def ask_set_question_probability_theory(message):
 def ask_set_question_geometric_concepts(message):
     try:
         question = message.text
-        sql = "SELECT answer FROM geometric_concepts WHERE question LIKE '%" + question + "%'"
+        sql = "SELECT answer, edu_mat FROM geometric_concepts WHERE question LIKE '%" + question + "%'"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
-        for rows in all_rows:
-            answer = rows[0]
-            edu_mat = rows[1]
-        print(all_rows)
-        bot.send_message(message.chat.id, '{}'.format(answer))
+        row = all_rows[0]
+        bot.send_message(message.chat.id, '{}'.format(row[0]))
         bot.send_message(message.chat.id,
                          'Дополнительные образовательные материалы по данному вопросу вы можете найти по ссылке '
-                         '{}'.format(edu_mat))
+                         '{}'.format(row[1]))
         msg = bot.send_message(message.chat.id, 'Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
@@ -262,17 +251,14 @@ def ask_set_question_geometric_concepts(message):
 def ask_set_question_algebraic_concepts(message):
     try:
         question = message.text
-        sql = "SELECT answer FROM algebraic_concepts WHERE question LIKE '%" + question + "%'"
+        sql = "SELECT answer, edu_mat FROM algebraic_concepts WHERE question LIKE '%" + question + "%'"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
-        for rows in all_rows:
-            answer = rows[0]
-            edu_mat = rows[1]
-        print(all_rows)
-        bot.send_message(message.chat.id, '{}'.format(answer))
+        row = all_rows[0]
+        bot.send_message(message.chat.id, '{}'.format(row[0]))
         bot.send_message(message.chat.id,
                          'Дополнительные образовательные материалы по данному вопросу вы можете найти по ссылке '
-                         '{}'.format(edu_mat))
+                         '{}'.format(row[1]))
         msg = bot.send_message(message.chat.id, 'Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
