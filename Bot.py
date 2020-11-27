@@ -435,58 +435,75 @@ def admin_panel_db_view(message):
     try:
         if message.text == 'radical_power_logarithm':
             msg = bot.send_message(message.chat.id, 'Все записи из таблицы radical_power_logarithm\n'
-                                              'id\nВопрос\nОтвет', reply_markup=cfg.kb_admc)
+                                              'id\nВопрос\nОтвет\nОбразовтельные материалы', reply_markup=cfg.kb_admc)
             cursor.execute('SELECT * FROM radical_power_logarithm ORDER BY id')
             rows = cursor.fetchall()
             for row in rows:
                 r1 = row[0]
                 r2 = row[1]
                 r3 = row[2]
-                bot.send_message(message.chat.id, '{}\n------------------------------\n{}\n------------------------------\n{}'.format(r1, r2, r3))
+                r4 = row[3]
+                bot.send_message(message.chat.id, '{}\n------------------------------\n{}\n------------------------------\n{}\n------------------------------\n{}'.format(r1, r2, r3, r4))
             bot.register_next_step_handler(msg, admin_panel_what)
         elif message.text == 'trigonometry':
             msg = bot.send_message(message.chat.id, 'Все записи из таблицы trigonometry\n'
-                                                    'id         Вопрос        Ответ', reply_markup=cfg.kb_admc)
+                                                    'id\nВопрос\nОтвет\nОбразовательные материалы',
+                                   reply_markup=cfg.kb_admc)
             cursor.execute('SELECT * FROM trigonometry ORDER BY id')
             rows = cursor.fetchall()
             for row in rows:
                 r1 = row[0]
                 r2 = row[1]
                 r3 = row[2]
-                bot.send_message(message.chat.id, '{}\n------------------------------\n{}\n------------------------------\n{}'.format(r1, r2, r3))
+                r4 = row[3]
+                bot.send_message(message.chat.id,
+                                 '{}\n------------------------------\n{}\n------------------------------\n{}\n------------------------------\n{}'.format(
+                                     r1, r2, r3, r4))
             bot.register_next_step_handler(msg, admin_panel_what)
         elif message.text == 'probability_theory':
             msg = bot.send_message(message.chat.id, 'Все записи из таблицы probability_theory\n'
-                                                    'id         Вопрос        Ответ', reply_markup=cfg.kb_admc)
+                                                    'id\nВопрос\nОтвет\nОбразовательные материалы',
+                                   reply_markup=cfg.kb_admc)
             cursor.execute('SELECT * FROM probability_theory ORDER BY id')
             rows = cursor.fetchall()
             for row in rows:
                 r1 = row[0]
                 r2 = row[1]
                 r3 = row[2]
-                bot.send_message(message.chat.id, '{}\n------------------------------\n{}\n------------------------------\n{}'.format(r1, r2, r3))
+                r4 = row[3]
+                bot.send_message(message.chat.id,
+                                 '{}\n------------------------------\n{}\n------------------------------\n{}\n------------------------------\n{}'.format(
+                                     r1, r2, r3, r4))
             bot.register_next_step_handler(msg, admin_panel_what)
         elif message.text == 'geometric_concepts':
             msg = bot.send_message(message.chat.id, 'Все записи из таблицы geometric_concepts\n'
-                                                    'id         Вопрос        Ответ', reply_markup=cfg.kb_admc)
+                                                    'id\nВопрос\nОтвет\nОбразовательные материалы',
+                                   reply_markup=cfg.kb_admc)
             cursor.execute('SELECT * FROM geometric_concepts ORDER BY id')
             rows = cursor.fetchall()
             for row in rows:
                 r1 = row[0]
                 r2 = row[1]
                 r3 = row[2]
-                bot.send_message(message.chat.id, '{}\n------------------------------\n{}\n------------------------------\n{}'.format(r1, r2, r3))
+                r4 = row[3]
+                bot.send_message(message.chat.id,
+                                 '{}\n------------------------------\n{}\n------------------------------\n{}\n------------------------------\n{}'.format(
+                                     r1, r2, r3, r4))
             bot.register_next_step_handler(msg, admin_panel_what)
         elif message.text == 'algebraic_concepts':
             msg = bot.send_message(message.chat.id, 'Все записи из таблицы algebraic_concepts\n'
-                                                    'id         Вопрос        Ответ', reply_markup=cfg.kb_admc)
+                                                    'id\nВопрос\nОтвет\nОбразовательные материалы',
+                                   reply_markup=cfg.kb_admc)
             cursor.execute('SELECT * FROM algebraic_concepts ORDER BY id')
             rows = cursor.fetchall()
             for row in rows:
                 r1 = row[0]
                 r2 = row[1]
                 r3 = row[2]
-                bot.send_message(message.chat.id, '{}\n------------------------------\n{}\n------------------------------\n{}'.format(r1, r2, r3))
+                r4 = row[3]
+                bot.send_message(message.chat.id,
+                                 '{}\n------------------------------\n{}\n------------------------------\n{}\n------------------------------\n{}'.format(
+                                     r1, r2, r3, r4))
             bot.register_next_step_handler(msg, admin_panel_what)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
