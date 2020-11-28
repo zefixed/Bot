@@ -30,7 +30,7 @@ class User:
         self.last_name = ''
 
 
-@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'adm', 'feedback', 'cookie'])
+@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'adm', 'feedback', 'cookie', 'acc_info'])
 def start_help_message(message):
     try:
         if message.text == '/start':
@@ -46,7 +46,8 @@ def start_help_message(message):
                                               '4. /reg (Позволяет мне обращаться к тебе по имени)\n'
                                               '5. /rereg (Позволяет перерегистрироваться)\n'
                                               '6. /info (Показывает информацию обо мне)\n'
-                                              '7. /feedback (Позволяет сообщить об ошибке или предложить нововведение)')
+                                              '7. /feedback (Позволяет сообщить об ошибке или предложить нововведение)\n'
+                                              '8. /acc_info (Позволяет просмотреть инфромацию об аккаунте в боте)')
         elif message.text == '/reg':
             name = bot.send_message(message.chat.id, 'Введите имя')
             bot.register_next_step_handler(name, reg_firstname_step)
@@ -67,6 +68,28 @@ def start_help_message(message):
         elif message.text == '/cookie':
             msg = bot.send_message(message.chat.id, 'Покормить разработчиков', reply_markup=cfg.kb_cookie)
             bot.register_next_step_handler(msg, easter_egg)
+        elif message.text == '/acc_info':
+            bot.send_message(message.chat.id, 'Информация об аккаунте')
+            cursor.execute("SELECT * FROM users WHERE user_id = " + str(message.from_user.id) + "")
+            i = cursor.fetchall()
+            i = i[0]
+            bot.send_message(message.chat.id, 'Имя: {}\n'
+                                              'Фамилия: {}\n'
+                                              'id в боте: {}\n'
+                                              'Telegram id: {}\n'
+                                              'Дата и время первичной регистрации в боте: {}\n'
+                                              'Дата и время последней перерегистрации в боте: {}'.format(i[2], i[3], i[0], i[1], i[4], i[5]))
+    except Exception:
+        bot.send_message(message.chat.id, 'Ошибка, информация об аккаунте недоступна. Возможная причина ошибки - аккаунт не создан')
+
+
+def acc_info(message):
+    try:
+        cursor.execute("SELECT * FROM users WHERE user_id = " + message.from_user.id + "")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
@@ -106,46 +129,26 @@ def ask_start(message):
 
 def ask_viev(message):
     try:
+        table = message.text
         if message.text == 'Корни, степени, логарифмы':
-            cursor.execute('SELECT * FROM radical_power_logarithm ORDER BY id')
-            rows = cursor.fetchall()
-            for row in rows:
-                r2 = row[1]
-                bot.send_message(message.chat.id,'{}'.format(r2))
-            msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?', reply_markup=cfg.kb_yes_no)
-            bot.register_next_step_handler(msg, ask_except)
+            table = 'radical_power_logarithm'
         elif message.text == 'Тригонометрия':
-            cursor.execute('SELECT * FROM trigonometry ORDER BY id')
-            rows = cursor.fetchall()
-            for row in rows:
-                r2 = row[1]
-                bot.send_message(message.chat.id, '{}'.format(r2))
-            msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?', reply_markup=cfg.kb_yes_no)
-            bot.register_next_step_handler(msg, ask_except)
+            table = 'trigonometry'
         elif message.text == 'Теория вероятностей':
-            cursor.execute('SELECT * FROM probability_theory ORDER BY id')
-            rows = cursor.fetchall()
-            for row in rows:
-                r2 = row[1]
-                bot.send_message(message.chat.id, '{}'.format(r2))
-            msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?', reply_markup=cfg.kb_yes_no)
-            bot.register_next_step_handler(msg, ask_except)
+            table = 'probability_theory'
         elif message.text == 'Геометрические понятия':
-            cursor.execute('SELECT * FROM geometric_concepts ORDER BY id')
-            rows = cursor.fetchall()
-            for row in rows:
-                r2 = row[1]
-                bot.send_message(message.chat.id, '{}'.format(r2))
-            msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?', reply_markup=cfg.kb_yes_no)
-            bot.register_next_step_handler(msg, ask_except)
+            table = 'geometric_concepts'
         elif message.text == 'Алгебраические понятия и интересные вопросы':
-            cursor.execute('SELECT * FROM algebraic_concepts ORDER BY id')
-            rows = cursor.fetchall()
-            for row in rows:
-                r2 = row[1]
-                bot.send_message(message.chat.id, '{}'.format(r2))
-            msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?', reply_markup=cfg.kb_yes_no)
-            bot.register_next_step_handler(msg, ask_except)
+            table = 'algebraic_concepts'
+        cursor.execute("SELECT * FROM " + table + " ORDER BY id")
+        rows = cursor.fetchall()
+        for row in rows:
+            r2 = row[1]
+            l = len(r2)
+            r = r2[0:l//2]
+            bot.send_message(message.chat.id,'{}'.format(r))
+        msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?', reply_markup=cfg.kb_yes_no)
+        bot.register_next_step_handler(msg, ask_except)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
@@ -174,7 +177,7 @@ def ask_set_table(message):
 def ask_set_question_radical_power_logarithm(message):
     try:
         question = message.text
-        sql = "SELECT answer, edu_mat FROM radical_power_logarithm WHERE question LIKE '%"+question+"%'"
+        sql = "SELECT answer, edu_mat FROM radical_power_logarithm WHERE MATCH (question) AGAINST ('" + question + "')"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
         row = all_rows[0]
@@ -186,14 +189,14 @@ def ask_set_question_radical_power_logarithm(message):
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
         msg = bot.send_message(message.chat.id,
-                               'Ошибка, ответ на ваш вопрос не найден. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
+                               """Ошибка, ответ на ваш вопрос не найден. Проверьте правильность ввода вопроса. Вопрос не должен содержать кавычек <"> <'> и запятых <,>. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?""", reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
 
 
 def ask_set_question_trigonometry(message):
     try:
         question = message.text
-        sql = "SELECT answer, edu_mat FROM trigonometry WHERE question LIKE '%" + question + "%'"
+        sql = "SELECT answer, edu_mat FROM trigonometry WHERE MATCH (question) AGAINST ('" + question + "')"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
         row = all_rows[0]
@@ -205,15 +208,14 @@ def ask_set_question_trigonometry(message):
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
         msg = bot.send_message(message.chat.id,
-                               'Ошибка, ответ на ваш вопрос не найден. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?',
-                               reply_markup=cfg.kb_yes_no)
+                               """Ошибка, ответ на ваш вопрос не найден. Проверьте правильность ввода вопроса. Вопрос не должен содержать кавычек <"> <'> и запятых <,>. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?""", reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
 
 
 def ask_set_question_probability_theory(message):
     try:
         question = message.text
-        sql = "SELECT answer, edu_mat FROM probability_theory WHERE question LIKE '%" + question + "%'"
+        sql = "SELECT answer, edu_mat FROM probability_theory WHERE MATCH (question) AGAINST ('" + question + "')"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
         row = all_rows[0]
@@ -225,14 +227,14 @@ def ask_set_question_probability_theory(message):
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
         msg = bot.send_message(message.chat.id,
-                         'Ошибка, ответ на ваш вопрос не найден. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
+                         """Ошибка, ответ на ваш вопрос не найден. Проверьте правильность ввода вопроса. Вопрос не должен содержать кавычек <"> <'> и запятых <,>. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?""", reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
 
 
 def ask_set_question_geometric_concepts(message):
     try:
         question = message.text
-        sql = "SELECT answer, edu_mat FROM geometric_concepts WHERE question LIKE '%" + question + "%'"
+        sql = "SELECT answer, edu_mat FROM geometric_concepts WHERE MATCH (question) AGAINST ('" + question + "')"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
         row = all_rows[0]
@@ -244,14 +246,14 @@ def ask_set_question_geometric_concepts(message):
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
         msg = bot.send_message(message.chat.id,
-                         'Ошибка, ответ на ваш вопрос не найден. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
+                         """Ошибка, ответ на ваш вопрос не найден. Проверьте правильность ввода вопроса. Вопрос не должен содержать кавычек <"> <'> и запятых <,>. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?""", reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
 
 
 def ask_set_question_algebraic_concepts(message):
     try:
         question = message.text
-        sql = "SELECT answer, edu_mat FROM algebraic_concepts WHERE question LIKE '%" + question + "%'"
+        sql = "SELECT answer, edu_mat FROM algebraic_concepts WHERE MATCH (question) AGAINST ('" + question + "')"
         cursor.execute(sql)
         all_rows = cursor.fetchall()
         row = all_rows[0]
@@ -263,7 +265,7 @@ def ask_set_question_algebraic_concepts(message):
         bot.register_next_step_handler(msg, ask_except)
     except Exception:
         msg = bot.send_message(message.chat.id,
-                         'Ошибка, ответ на ваш вопрос не найден. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?', reply_markup=cfg.kb_yes_no)
+                         """Ошибка, ответ на ваш вопрос не найден. Проверьте правильность ввода вопроса. Вопрос не должен содержать кавычек <"> <'> и запятых <,>. Попробуйте переформулировать вопрос или задать другой. Хотите задать вопрос ещё раз?""", reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
 
 
@@ -286,8 +288,8 @@ def feedback_start(message):
         if message.text == 'Проблема':
             msg = bot.send_message(message.chat.id, 'Опишите проблему')
             bot.register_next_step_handler(msg, feedback_problem)
-        elif message.text == 'Пожелание':
-            msg = bot.send_message(message.chat.id, 'Напишите пожелание')
+        elif message.text == 'Предложение':
+            msg = bot.send_message(message.chat.id, 'Напишите предложение')
             bot.register_next_step_handler(msg, feedback_request)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
@@ -370,7 +372,7 @@ def rereg_lastname_step(message):
     user = user_data[user_id]
     user.last_name = message.text
 
-    sql = 'UPDATE users SET first_name = %s, last_name = %s WHERE user_id = {0}'.format(user_id)
+    sql = 'UPDATE users SET first_name = %s, last_name = %s, rereg = NOW() WHERE user_id = {0}'.format(user_id)
     val = (user.first_name, user.last_name)
     cursor.execute(sql, val)
     db.commit()
