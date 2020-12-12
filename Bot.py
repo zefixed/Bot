@@ -11,12 +11,18 @@ db = mysql.connector.connect(
 
 cursor = db.cursor()
 
+
+sql = cursor.execute('SELECT id FROM users ORDER BY id DESC')
+qty = cursor.fetchall()
+
+
 bot = telebot.TeleBot(cfg.token)
 
 datab_data = {}
 user_data = {}
 name = ''
 question = ''
+s_db = [''] * qty[0][0]
 
 class Datab:
     def __init__(self, question):
