@@ -518,6 +518,7 @@ def admin_panel_create_link(message):
         sql = 'UPDATE ' + s_db.get(message.from_user.id) + ' SET edu_mat = %s WHERE id = %s'
         val = (message.text, str(s_dr.get(message.from_user.id)))
         cursor.execute(sql, val)
+        db.commit()
         msg = bot.send_message(message.chat.id, 'Запись добавленна', reply_markup=cfg.kb_admc)
         bot.register_next_step_handler(msg, admin_panel_what)
     except Exception as e:
