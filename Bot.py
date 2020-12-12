@@ -388,13 +388,13 @@ def send_text(message):
         sql = 'SELECT first_name FROM users WHERE user_id = {0}'.format(user_id)
         cursor.execute(sql)
         sup = cursor.fetchone()
-        if message.text.lower() == 'привет'and sup == None:
-            bot.send_message(message.chat.id,'Привет, если хочешь чтобы я к тебе обращался по имени введи /reg (не обязательно)')
-        elif message.text.lower() == 'привет'and sup != None:
+        if message.text.lower() == 'привет' and sup == None:
+            bot.send_message(message.chat.id, 'Привет, если хочешь чтобы я к тебе обращался по имени введи /reg (не обязательно)')
+        elif message.text.lower() == 'привет' and sup != None:
             name = sup[0]
             bot.send_message(message.chat.id, 'Привет, {}'.format(name))
         if message.text.lower() == 'пока' and sup == None:
-            bot.send_message(message.chat.id,'Пока, Аноним')
+            bot.send_message(message.chat.id, 'Пока, Аноним')
         elif message.text.lower() == 'пока'and sup != None:
             name = sup[0]
             bot.send_message(message.chat.id, 'Пока, {}'.format(name))
