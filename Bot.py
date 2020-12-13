@@ -1,6 +1,7 @@
 import telebot
 import mysql.connector
 import config as cfg
+import random as r
 
 db = mysql.connector.connect(
     host="localhost",
@@ -20,10 +21,16 @@ bot = telebot.TeleBot(cfg.token)
 
 datab_data = {}
 user_data = {}
+user_data_add = {} # additional user data
+s_db = {}          # select table
+s_dr = {}          # delete record
+test_ids = {}
+test_que = {}      # test's questions
+test_rans = {}     # test's right answers
+test_ans = {}      # answers from user
 name = ''
 question = ''
-s_db = {} # select table
-s_dr = {} # delete record
+
 
 class Datab:
     def __init__(self, question):
@@ -37,7 +44,7 @@ class User:
         self.last_name = ''
 
 
-@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'adm', 'feedback', 'cookie', 'acc_info'])
+@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'feedback', 'cookie', 'acc_info', 'test', 'adm'])
 def start_help_message(message):
     try:
         if message.text == '/start':
@@ -54,7 +61,8 @@ def start_help_message(message):
                                               '5. /rereg (Позволяет перерегистрироваться)\n'
                                               '6. /info (Показывает информацию обо мне)\n'
                                               '7. /feedback (Позволяет сообщить об ошибке или предложить нововведение)\n'
-                                              '8. /acc_info (Позволяет просмотреть инфромацию об аккаунте в боте)')
+                                              '8. /acc_info (Позволяет просмотреть инфромацию об аккаунте в боте)\n'
+                                              '9. /test (Позволяет проверить свои знания)')
         elif message.text == '/reg':
             name = bot.send_message(message.chat.id, 'Введите имя')
             bot.register_next_step_handler(name, reg_firstname_step)
@@ -66,9 +74,6 @@ def start_help_message(message):
                                               'Я был создан для того чтобы помочь тебе в повторении материала по школьным предметам.\n'
                                               'Пока что я могу помочь тебе только по математике 8-11 классов. \n'
                                               'Мои разработчики стараются над введением новых вопросов, если ты хочешь помочь им или нашёл какой-то недочёт в моей работе, пожалуйста, напиши им об этом с помощью /feedback')
-        elif message.text == '/adm':
-            adm = bot.send_message(message.chat.id, 'Введите пароль')
-            bot.register_next_step_handler(adm, admin_panel)
         elif message.text == '/feedback':
             msg = bot.send_message(message.chat.id, 'О чём вы бы хотели сообщить?', reply_markup=cfg.kb_fb)
             bot.register_next_step_handler(msg, feedback_start)
@@ -86,40 +91,14 @@ def start_help_message(message):
                                               'Telegram id: {}\n'
                                               'Дата и время первичной регистрации в боте: {}\n'
                                               'Дата и время последней перерегистрации в боте: {}'.format(i[2], i[3], i[0], i[1], i[4], i[5]))
+        elif message.text == '/test':
+            msg = bot.send_message(message.chat.id, 'Из скольки вопросов должен состоять тест?\n(Можете написать своё количество вопросов)', reply_markup=cfg.kb_test_qty)
+            bot.register_next_step_handler(msg, test_qty)
+        elif message.text == '/adm':
+            msg = bot.send_message(message.chat.id, 'Введите пароль')
+            bot.register_next_step_handler(msg, admin_panel)
     except Exception:
         bot.send_message(message.chat.id, 'Ошибка, информация об аккаунте недоступна. Возможная причина ошибки - аккаунт не создан')
-
-
-def acc_info(message):
-    try:
-        cursor.execute("SELECT * FROM users WHERE user_id = " + message.from_user.id + "")
-        rows = cursor.fetchall()
-        for row in rows:
-            print(row)
-
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
-
-
-def easter_egg(message):
-    try:
-        if message.text == 'Дать печеньку':
-            cursor.execute('SELECT cookies FROM easter_egg WHERE id = 1')
-            cookies = cursor.fetchall()
-            count = cookies[0]
-            count_old = count = count[0]
-            count +=1
-            sql = ('UPDATE easter_egg SET cookies = %s WHERE cookies = %s')
-            val = (count, count_old)
-            cursor.execute(sql, val)
-            db.commit()
-            msg = bot.send_message(message.chat.id, 'Всего печенек, {}'.format(count), reply_markup=cfg.kb_cookie)
-            bot.register_next_step_handler(msg, easter_egg)
-        elif message.text == 'Выйти':
-            msg = bot.send_message(message.chat.id, 'Вы можете выбрать функцию или просмотрите список доступных /help')
-            bot.register_next_step_handler(msg, start_help_message)
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
 def ask_start(message):
@@ -290,50 +269,6 @@ def ask_except(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-def feedback_start(message):
-    try:
-        if message.text == 'Проблема':
-            msg = bot.send_message(message.chat.id, 'Опишите проблему')
-            bot.register_next_step_handler(msg, feedback_problem)
-        elif message.text == 'Предложение':
-            msg = bot.send_message(message.chat.id, 'Напишите предложение')
-            bot.register_next_step_handler(msg, feedback_request)
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
-
-
-def feedback_problem(message):
-    try:
-        user_id = message.from_user.id
-        problem = message.text
-
-        sql = "INSERT INTO feedback (problem, user_id) VALUES (%s, %s)"
-        val = (problem, user_id)
-        cursor.execute(sql, val)
-        db.commit()
-
-        msg = bot.send_message(message.chat.id, 'Проблема в кротчайшие сроки будет исправлена')
-        bot.register_next_step_handler(msg, start_help_message)
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
-
-
-def feedback_request(message):
-    try:
-        user_id = message.from_user.id
-        request = message.text
-
-        sql = "INSERT INTO feedback (request, user_id) VALUES (%s, %s)"
-        val = (request, user_id)
-        cursor.execute(sql, val)
-        db.commit()
-
-        msg= bot.send_message(message.chat.id, 'Мы учтём ваше пожелание')
-        bot.register_next_step_handler(msg, start_help_message)
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
-
-
 def reg_firstname_step(message):
     try:
         user_id = message.from_user.id
@@ -386,6 +321,134 @@ def rereg_lastname_step(message):
 
     bot.send_message(message.chat.id, "Вы успешно перерегистрированны!")
 
+def feedback_start(message):
+    try:
+        if message.text == 'Проблема':
+            msg = bot.send_message(message.chat.id, 'Опишите проблему')
+            bot.register_next_step_handler(msg, feedback_problem)
+        elif message.text == 'Предложение':
+            msg = bot.send_message(message.chat.id, 'Напишите предложение')
+            bot.register_next_step_handler(msg, feedback_request)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def feedback_problem(message):
+    try:
+        user_id = message.from_user.id
+        problem = message.text
+
+        sql = "INSERT INTO feedback (problem, user_id) VALUES (%s, %s)"
+        val = (problem, user_id)
+        cursor.execute(sql, val)
+        db.commit()
+
+        msg = bot.send_message(message.chat.id, 'Проблема в кротчайшие сроки будет исправлена')
+        bot.register_next_step_handler(msg, start_help_message)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def feedback_request(message):
+    try:
+        user_id = message.from_user.id
+        request = message.text
+
+        sql = "INSERT INTO feedback (request, user_id) VALUES (%s, %s)"
+        val = (request, user_id)
+        cursor.execute(sql, val)
+        db.commit()
+
+        msg= bot.send_message(message.chat.id, 'Мы учтём ваше пожелание')
+        bot.register_next_step_handler(msg, start_help_message)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def easter_egg(message):
+    try:
+        if message.text == 'Дать печеньку':
+            cursor.execute('SELECT cookies FROM easter_egg WHERE id = 1')
+            cookies = cursor.fetchall()
+            count = cookies[0]
+            count_old = count = count[0]
+            count +=1
+            sql = ('UPDATE easter_egg SET cookies = %s WHERE cookies = %s')
+            val = (count, count_old)
+            cursor.execute(sql, val)
+            db.commit()
+            msg = bot.send_message(message.chat.id, 'Всего печенек, {}'.format(count), reply_markup=cfg.kb_cookie)
+            bot.register_next_step_handler(msg, easter_egg)
+        elif message.text == 'Выйти':
+            msg = bot.send_message(message.chat.id, 'Вы можете выбрать функцию или просмотрите список доступных /help')
+            bot.register_next_step_handler(msg, start_help_message)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def acc_info(message):
+    try:
+        cursor.execute("SELECT * FROM users WHERE user_id = " + message.from_user.id + "")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def test_qty(message):
+    try:
+        user_data[message.from_user.id] = message.text
+        msg = bot.send_message(message.chat.id, 'По какой теме вы бы хотели проверить свои знания?',reply_markup=cfg.kb_test)
+        bot.register_next_step_handler(msg, test_table)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+def test_table(message):
+    try:
+        table = message.text
+        if message.text == 'Корни, степени, логарифмы':
+            table = 'radical_power_logarithm'
+        elif message.text == 'Тригонометрия':
+            table = 'trigonometry'
+        elif message.text == 'Теория вероятностей':
+            table = 'probability_theory'
+        elif message.text == 'Геометрические понятия':
+            table = 'geometric_concepts'
+        elif message.text == 'Алгебраические понятия и интересные вопросы':
+            table = 'algebraic_concepts'
+        cursor.execute('SELECT id, question, answer FROM ' + table + '')
+        rows = cursor.fetchall()
+        ids = [0] * 50
+        questions = [''] * 50
+        answers = [''] * 50
+        print(questions)
+        i = 0
+        for row in rows:
+            ids[i] = row[0]
+            questions[i] = row[1]
+            answers[i] = row[2]
+            i += 1
+        i = 0
+        for question in questions:
+            l = len(question)
+            questions[i] = question[0:l // 2]
+            i += 1
+        test_ids[message.from_user.id] = r.sample(ids, int(user_data.get(message.from_user.id)))
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, желаемое количество вопросов в тесте превышает доступное количество по данной теме. Попробуйте ещё раз.{}'.format(e))
+        msg = bot.send_message(message.chat.id, 'Из скольки вопросов должен состоять тест?\n(Можете написать своё количество вопросов)', reply_markup=cfg.kb_test_qty)
+        bot.register_next_step_handler(msg, test_qty)
+
+
+def test_(message):
+    try:
+        pass
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
@@ -409,7 +472,6 @@ def send_text(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-@bot.message_handler(content_types=['text'])
 def admin_panel(message):
     try:
         if message.text == cfg.adm:
