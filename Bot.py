@@ -13,8 +13,8 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 
 
-sql = cursor.execute('SELECT id FROM users ORDER BY id DESC')
-qty = cursor.fetchall()
+# sql = cursor.execute('SELECT id FROM users ORDER BY id DESC')
+# qty = cursor.fetchall()
 
 
 bot = telebot.TeleBot(cfg.token)
