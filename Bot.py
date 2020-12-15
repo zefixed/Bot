@@ -310,16 +310,20 @@ def rereg_firstname_step(message):
 
 
 def rereg_lastname_step(message):
-    user_id = message.from_user.id
-    user = user_data[user_id]
-    user.last_name = message.text
+    try:
+        user_id = message.from_user.id
+        user = user_data[user_id]
+        user.last_name = message.text
 
-    sql = 'UPDATE users SET first_name = %s, last_name = %s, rereg = NOW() WHERE user_id = {0}'.format(user_id)
-    val = (user.first_name, user.last_name)
-    cursor.execute(sql, val)
-    db.commit()
+        sql = 'UPDATE users SET first_name = %s, last_name = %s, rereg = NOW() WHERE user_id = {0}'.format(user_id)
+        val = (user.first_name, user.last_name)
+        cursor.execute(sql, val)
+        db.commit()
 
-    bot.send_message(message.chat.id, "Вы успешно перерегистрированны!")
+        bot.send_message(message.chat.id, "Вы успешно перерегистрированны!")
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
 
 def feedback_start(message):
     try:
@@ -542,10 +546,9 @@ def admin_panel_db_selection_delete(message):
 
 def admin_panel_create_question(message):
     try:
-        datab_id = message.from_user.id
-        datab_data[datab_id] = Datab(message.text)
-
-        Datab.question = message.text
+        que = [''] * 3
+        que[0] = message.text
+        datab_data[message.from_user.id] = que
         msg = bot.send_message(message.chat.id, 'Введите ответ')
         bot.register_next_step_handler(msg, admin_panel_create_answer)
     except Exception as e:
@@ -554,21 +557,9 @@ def admin_panel_create_question(message):
 
 def admin_panel_create_answer(message):
     try:
-        datab_id = message.from_user.id
-        datab_data[datab_id] = Datab(message.text)
-
-        datab_id = message.from_user.id
-        datab = datab_data[datab_id]
-        datab.answer = message.text
-
-        sql = "INSERT INTO " + s_db.get(datab_id) + " (question, answer) \
-                                          VALUES (%s, %s)"
-        val = (Datab.question, datab.answer)
-        cursor.execute(sql, val)
-        db.commit()
-
-        cursor.execute('SELECT id FROM ' + s_db.get(datab_id) + ' ORDER BY ID DESC LIMIT 1')
-        s_dr[datab_id] = cursor.fetchone()[0]
+        que = datab_data.get(message.from_user.id)
+        que[1] = message.text
+        datab_data[message.from_user.id] = que
         msg = bot.send_message(message.chat.id, 'Введите ссылку на дополнительный образовательный материал')
         bot.register_next_step_handler(msg, admin_panel_create_link)
     except Exception as e:
@@ -577,8 +568,10 @@ def admin_panel_create_answer(message):
 
 def admin_panel_create_link(message):
     try:
-        sql = 'UPDATE ' + s_db.get(message.from_user.id) + ' SET edu_mat = %s WHERE id = %s'
-        val = (message.text, str(s_dr.get(message.from_user.id)))
+        que = datab_data.get(message.from_user.id)
+        que[2] = message.text
+        sql = "INSERT INTO " + s_db.get(message.from_user.id) + " (question, answer, edu_mat) VALUES (%s, %s, %s)"
+        val = (que[0], que[1], que[2])
         cursor.execute(sql, val)
         db.commit()
         msg = bot.send_message(message.chat.id, 'Запись добавленна', reply_markup=cfg.kb_admc)
