@@ -271,9 +271,9 @@ def ask_except(message):
 
 def reg_firstname_step(message):
     try:
-        user_id = message.from_user.id
-        user_data[user_id] = User(message.text)
-
+        user = ['', '']
+        user[0] = message.text
+        user_data[message.from_user.id] = user
         msg = bot.send_message(message.chat.id, "Введите фамилию")
         bot.register_next_step_handler(msg, reg_lastname_step)
     except Exception as e:
@@ -282,16 +282,12 @@ def reg_firstname_step(message):
 
 def reg_lastname_step(message):
     try:
-        user_id = message.from_user.id
-        user = user_data[user_id]
-        user.last_name = message.text
-
-        sql = "INSERT INTO users (first_name, last_name, user_id) \
-                                  VALUES (%s, %s, %s)"
-        val = (user.first_name, user.last_name, user_id)
+        user = user_data.get(message.from_user.id)
+        user[1] = message.text
+        sql = "INSERT INTO users (first_name, last_name, user_id) VALUES (%s, %s, %s)"
+        val = (user[0], user[1], message.from_user.id)
         cursor.execute(sql, val)
         db.commit()
-
         msg = bot.send_message(message.chat.id, "Вы успешно зарегистрированны!")
         bot.register_next_step_handler(msg, start_help_message)
     except Exception as e:
@@ -300,9 +296,9 @@ def reg_lastname_step(message):
 
 def rereg_firstname_step(message):
     try:
-        user_id = message.from_user.id
-        user_data[user_id] = User(message.text)
-
+        user = ['', '']
+        user[0] = message.text
+        user_data[message.from_user.id] = user
         msg = bot.send_message(message.chat.id, "Введите фамилию")
         bot.register_next_step_handler(msg, rereg_lastname_step)
     except Exception as e:
@@ -311,15 +307,12 @@ def rereg_firstname_step(message):
 
 def rereg_lastname_step(message):
     try:
-        user_id = message.from_user.id
-        user = user_data[user_id]
-        user.last_name = message.text
-
-        sql = 'UPDATE users SET first_name = %s, last_name = %s, rereg = NOW() WHERE user_id = {0}'.format(user_id)
-        val = (user.first_name, user.last_name)
+        user = user_data.get(message.from_user.id)
+        user[1] = message.text
+        sql = 'UPDATE users SET first_name = %s, last_name = %s, rereg = NOW() WHERE user_id = {0}'.format(message.from_user.id)
+        val = (user[0], user[1])
         cursor.execute(sql, val)
         db.commit()
-
         bot.send_message(message.chat.id, "Вы успешно перерегистрированны!")
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
