@@ -13,10 +13,6 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 
 
-# sql = cursor.execute('SELECT id FROM users ORDER BY id DESC')
-# qty = cursor.fetchall()
-
-
 bot = telebot.TeleBot(cfg.token)
 
 datab_data = {}
@@ -24,7 +20,7 @@ user_data = {}
 user_data_add = {} # additional user data
 s_db = {}          # select table
 s_dr = {}          # delete record
-test_ids = {}
+test = {}          # [id, question, answer, position]
 test_que = {}      # test's questions
 test_rans = {}     # test's right answers
 test_ans = {}      # answers from user
@@ -32,16 +28,16 @@ name = ''
 question = ''
 
 
-class Datab:
-    def __init__(self, question):
-        self.question = question
-        self.answer = ''
-
-
-class User:
-    def __init__(self, first_name):
-        self.first_name = first_name
-        self.last_name = ''
+# class Datab:
+#     def __init__(self, question):
+#         self.question = question
+#         self.answer = ''
+#
+#
+# class User:
+#     def __init__(self, first_name):
+#         self.first_name = first_name
+#         self.last_name = ''
 
 
 @bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'feedback', 'cookie', 'acc_info', 'test', 'adm'])
@@ -405,44 +401,95 @@ def test_qty(message):
 
 def test_table(message):
     try:
-        table = message.text
+        datab_data[message.from_user.id] = message.text
         if message.text == 'Корни, степени, логарифмы':
-            table = 'radical_power_logarithm'
+            datab_data[message.from_user.id] = 'radical_power_logarithm'
         elif message.text == 'Тригонометрия':
-            table = 'trigonometry'
+            datab_data[message.from_user.id] = 'trigonometry'
         elif message.text == 'Теория вероятностей':
-            table = 'probability_theory'
+            datab_data[message.from_user.id] = 'probability_theory'
         elif message.text == 'Геометрические понятия':
-            table = 'geometric_concepts'
+            datab_data[message.from_user.id] = 'geometric_concepts'
         elif message.text == 'Алгебраические понятия и интересные вопросы':
-            table = 'algebraic_concepts'
-        cursor.execute('SELECT id, question, answer FROM ' + table + '')
-        rows = cursor.fetchall()
-        ids = [0] * 50
-        questions = [''] * 50
-        answers = [''] * 50
-        print(questions)
-        i = 0
-        for row in rows:
-            ids[i] = row[0]
-            questions[i] = row[1]
-            answers[i] = row[2]
-            i += 1
-        i = 0
-        for question in questions:
-            l = len(question)
-            questions[i] = question[0:l // 2]
-            i += 1
-        test_ids[message.from_user.id] = r.sample(ids, int(user_data.get(message.from_user.id)))
+            datab_data[message.from_user.id] = 'algebraic_concepts'
+        if message.text != 'Выход':
+            cursor.execute('SELECT id, question, answer FROM ' + datab_data[message.from_user.id] + '')
+            rows = cursor.fetchall()
+            test[message.from_user.id] = r.sample(rows, int(user_data.get(message.from_user.id)))
+            ques = [[]] * int(user_data.get(message.from_user.id))
+            i = 0
+            for que in test[message.from_user.id]:
+                q = [0, '', '']
+                q[0] = que[0]
+                q[1] = que[1]
+                q[2] = que[2]
+                ques[i] = q
+                i += 1
+            i = 0
+            for que in ques:
+                q = [0, '', '', 0]
+                q[0] = que[0]
+                l = len(que[1])
+                q[1] = que[1][0:l // 2]
+                q[2] = que[2]
+                q[3] = r.randint(1, 4)
+                ques[i] = q
+                i += 1
+            test[message.from_user.id] = ques
+            print(test[message.from_user.id])
+            msg = bot.send_message(message.chat.id, 'Ваш тест сгенерирован, перейти к тесту?', reply_markup=cfg.kb_yes_no)
+            bot.register_next_step_handler(msg, test_main)
+        elif message.text == 'Выход':
+            msg = bot.send_message(message.chat.id, 'Понял, принял, сегодня без тестов')
+            bot.register_next_step_handler(msg, start_help_message)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, желаемое количество вопросов в тесте превышает доступное количество по данной теме. Попробуйте ещё раз.{}'.format(e))
         msg = bot.send_message(message.chat.id, 'Из скольки вопросов должен состоять тест?\n(Можете написать своё количество вопросов)', reply_markup=cfg.kb_test_qty)
         bot.register_next_step_handler(msg, test_qty)
 
 
-def test_(message):
+def test_main(message):
     try:
-        pass
+        bot.send_message(message.chat.id, 'В ответ нужно написать правильный вариант ответа')
+        for i in range(1, int(user_data.get(message.from_user.id))+1):
+            cursor.execute('SELECT answer FROM ' + str(datab_data[message.from_user.id]) + ' WHERE id != ' + str(test[message.from_user.id][i-1][0]) + '')
+            rows = cursor.fetchall()
+            if test[message.from_user.id][i-1][3] == 1:
+                oth = r.sample(rows, 3)
+                bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
+                                                  '' + str(test[message.from_user.id][i-1][1]) + '\n\n'
+                                                  'Варианты ответов:\n'
+                                                  '1) ' + str(test[message.from_user.id][i-1][2]) + '\n'
+                                                  '2) ' + str(oth[0][0]) + '\n'
+                                                  '3) ' + str(oth[1][0]) + '\n'
+                                                  '4) ' + str(oth[2][0]) + '\n')
+            elif test[message.from_user.id][i-1][3] == 2:
+                oth = r.sample(rows, 3)
+                bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
+                                                  '' + test[message.from_user.id][i - 1][1] + '\n\n'
+                                                  'Варианты ответов:\n'
+                                                  '1) ' + str(oth[0][0]) + '\n'
+                                                  '2) ' + str(test[message.from_user.id][i - 1][2]) + '\n'
+                                                  '3) ' + str(oth[1][0]) + '\n'
+                                                  '4) ' + str(oth[2][0]) + '\n')
+            elif test[message.from_user.id][i-1][3] == 3:
+                oth = r.sample(rows, 3)
+                bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
+                                                  '' + test[message.from_user.id][i - 1][1] + '\n\n'
+                                                  'Варианты ответов:\n'
+                                                  '1) ' + str(oth[1][0]) + '\n'
+                                                  '2) ' + str(oth[0][0]) + '\n'
+                                                  '3) ' + str(test[message.from_user.id][i - 1][2]) + '\n'
+                                                  '4) ' + str(oth[2][0]) + '\n')
+            elif test[message.from_user.id][i-1][3] == 4:
+                oth = r.sample(rows, 3)
+                bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
+                                                  '' + test[message.from_user.id][i - 1][1] + '\n\n'
+                                                  'Варианты ответов:\n'
+                                                  '1) ' + str(oth[2][0]) + '\n'
+                                                  '2) ' + str(oth[0][0]) + '\n'
+                                                  '3) ' + str(oth[1][0]) + '\n'
+                                                  '4) ' + str(test[message.from_user.id][i - 1][2]) + '\n')
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
