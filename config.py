@@ -36,5 +36,8 @@ kb_test.row('Корни, степени, логарифмы', 'Тригоном�
 kb_test_qty = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_test_qty.row('5', '7', '10', '15')
 
+kb_test_mistakes = telebot.types.ReplyKeyboardMarkup(True, True)
+kb_test_mistakes.row('Просмотреть ошибки', 'Выйти')
+
 adm = 'f297a57a5a743894a0e4a801fc3'
 
