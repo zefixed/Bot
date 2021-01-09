@@ -317,16 +317,8 @@ def test_qty(message):
 def test_table(message):
     try:
         datab_data[message.from_user.id] = message.text
-        if message.text == 'Корни, степени, логарифмы':
-            datab_data[message.from_user.id] = 'radical_power_logarithm'
-        elif message.text == 'Тригонометрия':
-            datab_data[message.from_user.id] = 'trigonometry'
-        elif message.text == 'Теория вероятностей':
-            datab_data[message.from_user.id] = 'probability_theory'
-        elif message.text == 'Геометрические понятия':
-            datab_data[message.from_user.id] = 'geometric_concepts'
-        elif message.text == 'Алгебраические понятия и интересные вопросы':
-            datab_data[message.from_user.id] = 'algebraic_concepts'
+        if message.text == 'Математика':
+            datab_data[message.from_user.id] = 'math'
         if message.text != 'Выход':
             cursor.execute('SELECT id, question, answer FROM ' + datab_data[message.from_user.id] + '')
             rows = cursor.fetchall()
@@ -414,7 +406,7 @@ def test_main(message):
                     user_data[message.from_user.id][0] = int(user_data[message.from_user.id][0]) - 1
                     user_data_add[message.from_user.id] = int(user_data_add[message.from_user.id]) + 1
             else:
-                msg = bot.send_message(message.chat.id, 'В ответе напишите последовательность цифр верных ответов на вопросы по порядку их следования в тесте через пробел. Если затрудняетесь ответить на вопрос напишите 0')
+                msg = bot.send_message(message.chat.id, 'В ответе напишите последовательность цифр выбранных вами как ответы на вопросы по порядку их следования в тесте через пробел. Если затрудняетесь ответить на вопрос напишите 0')
                 bot.register_next_step_handler(msg, test_answers)
         elif message.text == 'Нет':
             bot.send_message(message.chat.id, 'Ну, не хотите – как хотите')
@@ -491,7 +483,8 @@ def admin_panel(message):
             msg = bot.send_message(message.chat.id, 'Добро пожаловать в админ панель', reply_markup=cfg.kb_admc)
             bot.register_next_step_handler(msg, admin_panel_what)
         else:
-                bot.send_message(message.chat.id, 'Неправильный пароль, попробуйте ещё раз', reply_markup=cfg.kb_adm)
+            msg = bot.send_message(message.chat.id, 'Неправильный пароль, попробуйте ещё раз')
+            bot.register_next_step_handler(msg, admin_panel)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
@@ -500,13 +493,13 @@ def admin_panel_what(message):
     try:
         mes = message.text
         if mes == 'Создать новую запись':
-            msg = bot.send_message(message.chat.id, 'В какую таблицу добавлять запись?', reply_markup=cfg.kb_admbd)
+            msg = bot.send_message(message.chat.id, 'В какую таблицу добавлять запись?', reply_markup=cfg.kb_adm_table)
             bot.register_next_step_handler(msg, admin_panel_db_selection_create)
         elif mes == 'Удалить запись':
-            msg = bot.send_message(message.chat.id, 'Из какой таблицы удалять запись', reply_markup=cfg.kb_admbd)
+            msg = bot.send_message(message.chat.id, 'Из какой таблицы удалять запись', reply_markup=cfg.kb_adm_table)
             bot.register_next_step_handler(msg, admin_panel_db_selection_delete)
         elif mes == 'Просмотреть все записи':
-            msg = bot.send_message(message.chat.id, 'Записи какой таблицы вы хотите просмотреть?', reply_markup=cfg.kb_admbd)
+            msg = bot.send_message(message.chat.id, 'Записи какой таблицы вы хотите просмотреть?', reply_markup=cfg.kb_adm_table)
             bot.register_next_step_handler(msg, admin_panel_db_view)
         elif mes == 'Выйти':
             msg = bot.send_message(message.chat.id, 'Вы вышли из админ панели')
@@ -521,14 +514,26 @@ def admin_panel_db_view(message):
                                                 'id\nВопрос\nОтвет\nОбразовтельные материалы')
         cursor.execute('SELECT * FROM ' + message.text + ' ORDER BY id')
         rows = cursor.fetchall()
+        user_data[message.from_user.id] = [''] * 10
+        i = 0
         for row in rows:
-            r1 = row[0]
-            r2 = row[1]
-            r3 = row[2]
-            r4 = row[3]
-            bot.send_message(message.chat.id,
-                             '{}\n------------------------------\n{}\n------------------------------\n{}\n------------------------------\n{}'.format(
-                                 r1, r2, r3, r4))
+            if i < 10:
+                user_data[message.from_user.id][i] = str(row[0]) + '\n------------------------------\n' + str(row[1]) + \
+                '\n------------------------------\n' + str(row[2]) + '\n------------------------------\n' + str(row[3] + '\n\n\n\n')
+                i += 1
+            elif i == 10:
+                i = 0
+                user_data[message.from_user.id][i] = str(row[0]) + '\n------------------------------\n' + str(row[1]) + \
+                '\n------------------------------\n' + str(row[2]) + '\n------------------------------\n' + str(row[3] + '\n\n\n\n')
+                i += 1
+
+                mes = user_data.get(message.from_user.id)
+                msg = mes[0] + '\n' + mes[1] + '\n' + mes[2] + '\n' + mes[3] + '\n' + mes[4] + '\n' + mes[5] + '\n' + mes[6] + '\n' + mes[7] + '\n' + mes[8] + '\n' + mes[9]
+                bot.send_message(message.chat.id, '{}'.format(msg))
+        for row in user_data.get(message.from_user.id):
+            if i > 0:
+                i -= 1
+                bot.send_message(message.chat.id, '{}'.format(row))
         msg = bot.send_message(message.chat.id, 'Что делаем дальше?', reply_markup=cfg.kb_admc)
         bot.register_next_step_handler(msg, admin_panel_what)
     except Exception as e:
@@ -599,7 +604,8 @@ def admin_panel_delete(message):
         id_print = record[0]
         question_print = record[1]
         answer_print = record[2]
-        bot.send_message(message.chat.id, 'id: {}\nquestion: {}\nanswer: {}'.format(id_print, question_print, answer_print))
+        edu_mat_print = record[3]
+        bot.send_message(message.chat.id, 'id: {}\nquestion: {}\nanswer: {}\nedu_mat: {}'.format(id_print, question_print, answer_print, edu_mat_print))
         msg = bot.send_message(message.chat.id, 'Вы уверены что хотите удалить эту запись?', reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, admin_panel_delete2)
     except Exception as e:

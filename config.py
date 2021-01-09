@@ -12,8 +12,8 @@ kb_cookie.row('Дать печеньку', 'Выйти')
 kb_admc = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_admc.row('Создать новую запись', 'Удалить запись').add('Просмотреть все записи', 'Выйти')
 
-kb_admbd = telebot.types.ReplyKeyboardMarkup(True, True)
-kb_admbd.row('radical_power_logarithm', 'trigonometry').add('probability_theory', 'geometric_concepts').add('algebraic_concepts')
+kb_adm_table = telebot.types.ReplyKeyboardMarkup(True, True)
+kb_adm_table.row('math')
 
 kb_adm = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_adm.row('/adm')
@@ -31,7 +31,7 @@ kb_ask_t = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_ask_t.row('Математика')
 
 kb_test = telebot.types.ReplyKeyboardMarkup(True, True)
-kb_test.row('Корни, степени, логарифмы', 'Тригонометрия').add('Теория вероятностей', 'Геометрические понятия').add('Алгебраические понятия и интересные вопросы', 'Выход')
+kb_test.row('Математика', 'Выход')
 
 kb_test_qty = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_test_qty.row('5', '7', '10', '15')
