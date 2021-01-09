@@ -28,7 +28,7 @@ kb_ask = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_ask.row('Просмотреть список доступных вопросов', 'Написать вручную')
 
 kb_ask_t = telebot.types.ReplyKeyboardMarkup(True, True)
-kb_ask_t.row('Корни, степени, логарифмы', 'Тригонометрия').add('Теория вероятностей', 'Геометрические понятия').add('Алгебраические понятия и интересные вопросы')
+kb_ask_t.row('Математика')
 
 kb_test = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_test.row('Корни, степени, логарифмы', 'Тригонометрия').add('Теория вероятностей', 'Геометрические понятия').add('Алгебраические понятия и интересные вопросы', 'Выход')
