@@ -16,6 +16,25 @@ if message.text == '':
 elif message.text == '':
 
 #-----------------------------------------------------------------------------------------------------------------------
+    try:
+        table = message.text
+        if message.text == 'Математика':
+            table = 'math'
+        cursor.execute("SELECT * FROM " + table + " ORDER BY id")
+        rows = cursor.fetchall()
+        user_data[message.from_user.id] = [''] * len(rows)
+        i = 0
+        for row in rows:
+            r2 = row[1]
+            l = len(r2)
+            r = r2[0:l//2]
+            user_data[message.from_user.id][i] = r
+            i += 1
+        bot.send_message(message.chat.id,'{}'.format(user_data[message.from_user.id]))
+        msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?', reply_markup=cfg.kb_yes_no)
+        bot.register_next_step_handler(msg, ask_except)
+    except Exception as e:
+        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 #-----------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------
