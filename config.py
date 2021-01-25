@@ -1,6 +1,6 @@
 import telebot
 
-token = '1348485436:AAETyTwfpvevMsozjXoQl9WRZptjhAwH-Ks'
+token = '1348485436:AAHMeMOVAXSfgVaA0208oy5cdRUGWIN0pIg'
 token_old = '1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY'
 
 kb = telebot.types.ReplyKeyboardMarkup(True, True)
