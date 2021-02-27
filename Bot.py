@@ -2,6 +2,7 @@ import telebot
 import mysql.connector
 import config as cfg
 import random as r
+from telebot import types
 
 db = mysql.connector.connect(
     host="localhost",
@@ -18,6 +19,7 @@ bot = telebot.TeleBot(cfg.token)
 datab_data = {}
 user_data = {}
 user_data_add = {}  # additional user data
+user_data_test = {} # answers to test
 s_db = {}           # select table
 s_dr = {}           # delete record
 test = {}           # [id, question, answer, position]
@@ -361,88 +363,62 @@ def test_main(message):
                 i = user_data_add[message.from_user.id]
                 cursor.execute('SELECT answer FROM ' + str(datab_data[message.from_user.id]) + ' WHERE id != ' + str(test[message.from_user.id][i-1][0]) + '')
                 rows = cursor.fetchall()
+                kb_1234 = types.InlineKeyboardMarkup(row_width=2)
+                kb_1 = types.InlineKeyboardButton(text="1", callback_data="1 " + str(i) + " " + str(message.from_user.id) + "")
+                kb_2 = types.InlineKeyboardButton(text="2", callback_data="2 " + str(i) + " " + str(message.from_user.id) + "")
+                kb_3 = types.InlineKeyboardButton(text="3", callback_data="3 " + str(i) + " " + str(message.from_user.id) + "")
+                kb_4 = types.InlineKeyboardButton(text="4", callback_data="4 " + str(i) + " " + str(message.from_user.id) + "")
+                kb_1234.add(kb_1, kb_2, kb_3, kb_4)
                 if test[message.from_user.id][i-1][3] == 1:
                     oth = r.sample(rows, 3)
-                    bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
+                    msg = bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
                                                       '' + str(test[message.from_user.id][i-1][1]) + '\n\n'
                                                       'Варианты ответов:\n'
                                                       '1) ' + str(test[message.from_user.id][i-1][2]) + '\n'
                                                       '2) ' + str(oth[0][0]) + '\n'
                                                       '3) ' + str(oth[1][0]) + '\n'
-                                                      '4) ' + str(oth[2][0]) + '\n')
+                                                      '4) ' + str(oth[2][0]) + '\n', reply_markup=kb_1234)
                     user_data[message.from_user.id][0] = int(user_data[message.from_user.id][0]) - 1
                     user_data_add[message.from_user.id] = int(user_data_add[message.from_user.id]) + 1
                 elif test[message.from_user.id][i-1][3] == 2:
                     oth = r.sample(rows, 3)
-                    bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
+                    msg = bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
                                                       '' + test[message.from_user.id][i - 1][1] + '\n\n'
                                                       'Варианты ответов:\n'
                                                       '1) ' + str(oth[0][0]) + '\n'
                                                       '2) ' + str(test[message.from_user.id][i - 1][2]) + '\n'
                                                       '3) ' + str(oth[1][0]) + '\n'
-                                                      '4) ' + str(oth[2][0]) + '\n')
+                                                      '4) ' + str(oth[2][0]) + '\n', reply_markup=kb_1234)
                     user_data[message.from_user.id][0] = int(user_data[message.from_user.id][0]) - 1
                     user_data_add[message.from_user.id] = int(user_data_add[message.from_user.id]) + 1
                 elif test[message.from_user.id][i-1][3] == 3:
                     oth = r.sample(rows, 3)
-                    bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
+                    msg = bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
                                                       '' + test[message.from_user.id][i - 1][1] + '\n\n'
                                                       'Варианты ответов:\n'
                                                       '1) ' + str(oth[1][0]) + '\n'
                                                       '2) ' + str(oth[0][0]) + '\n'
                                                       '3) ' + str(test[message.from_user.id][i - 1][2]) + '\n'
-                                                      '4) ' + str(oth[2][0]) + '\n')
+                                                      '4) ' + str(oth[2][0]) + '\n', reply_markup=kb_1234)
                     user_data[message.from_user.id][0] = int(user_data[message.from_user.id][0]) - 1
                     user_data_add[message.from_user.id] = int(user_data_add[message.from_user.id]) + 1
                 elif test[message.from_user.id][i-1][3] == 4:
                     oth = r.sample(rows, 3)
-                    bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
+                    msg = bot.send_message(message.chat.id, 'Вопрос №' + str(i) + '\n'
                                                       '' + test[message.from_user.id][i - 1][1] + '\n\n'
                                                       'Варианты ответов:\n'
                                                       '1) ' + str(oth[2][0]) + '\n'
                                                       '2) ' + str(oth[0][0]) + '\n'
                                                       '3) ' + str(oth[1][0]) + '\n'
-                                                      '4) ' + str(test[message.from_user.id][i - 1][2]) + '\n')
+                                                      '4) ' + str(test[message.from_user.id][i - 1][2]) + '\n', reply_markup=kb_1234)
                     user_data[message.from_user.id][0] = int(user_data[message.from_user.id][0]) - 1
                     user_data_add[message.from_user.id] = int(user_data_add[message.from_user.id]) + 1
             else:
-                msg = bot.send_message(message.chat.id, 'В ответе напишите последовательность цифр выбранных вами как ответы на вопросы по порядку их следования в тесте через пробел. Если затрудняетесь ответить на вопрос напишите 0')
-                bot.register_next_step_handler(msg, test_answers)
+                msg = bot.send_message(message.chat.id, 'Для проверки ответов воспользуйтесь кнопкой ниже', reply_markup=cfg.kb_test_end)
+                user_data_test[message.from_user.id] = [0] * int(user_data[message.from_user.id][1])
+                bot.register_next_step_handler(msg, callback_test)
         elif message.text == 'Нет':
             bot.send_message(message.chat.id, 'Ну, не хотите – как хотите')
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
-
-
-def test_answers(message):
-    try:
-        qty_right_answers = 0
-        score = [0] * int(user_data[message.from_user.id][1])
-        test_ans[message.from_user.id] = message.text.split()
-        bot.send_message(message.chat.id, 'Ваш ответ принят')
-        right_answers = [0] * int(user_data[message.from_user.id][1])
-        i = 0
-        for row in test[message.from_user.id]:
-            right_answers[i] = row[3]
-            i += 1
-        i = 0
-        for row in test_ans[message.from_user.id]:
-            test_ans[message.from_user.id][i] = int(row)
-            i += 1
-        i = 0
-        for row in right_answers:
-            if row == test_ans[message.from_user.id][i]:
-                score[i] = 1
-                i += 1
-            elif row != test_ans[message.from_user.id][i]:
-                score[i] = 0
-                i += 1
-        for row in score:
-            qty_right_answers += int(row)
-        test_ringt_ans[message.from_user.id] = right_answers
-        msg = bot.send_message(message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(user_data[message.from_user.id][1]) + '\
- или ' + str(round(100 / int(user_data[message.from_user.id][1]) * int(qty_right_answers), 2)) + '%', reply_markup=cfg.kb_test_mistakes)
-        bot.register_next_step_handler(msg, test_mistakes)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
@@ -625,5 +601,47 @@ def admin_panel_delete2(message):
             bot.register_next_step_handler(msg, admin_panel_what)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_test(call):
+    try:
+       if call.message:
+           if call.data == "end":
+               qty_right_answers = 0
+               score = [0] * int(user_data[call.from_user.id][1])
+               test_ans[call.from_user.id] = user_data_test.get(call.from_user.id)
+               right_answers = [0] * int(user_data[call.from_user.id][1])
+               i = 0
+               for row in test[call.from_user.id]:
+                   right_answers[i] = row[3]
+                   i += 1
+               i = 0
+               for row in test_ans[call.from_user.id]:
+                   test_ans[call.from_user.id][i] = int(row)
+                   i += 1
+               i = 0
+               for row in right_answers:
+                   if row == test_ans[call.from_user.id][i]:
+                       score[i] = 1
+                       i += 1
+                   elif row != test_ans[call.from_user.id][i]:
+                       score[i] = 0
+                       i += 1
+               for row in score:
+                   qty_right_answers += int(row)
+               test_ringt_ans[call.from_user.id] = right_answers
+               msg = bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(
+                   user_data[call.from_user.id][1]) + ' или ' + str(round(100 / int(user_data[call.from_user.id][1]) * int(qty_right_answers), 2)) + '%',
+                                      reply_markup=cfg.kb_test_mistakes)
+               bot.register_next_step_handler(msg, test_mistakes)
+           if call.data != 'end':
+               cd = call.data
+               cd = cd.split()
+               answers = user_data_test.get(int(cd[2]))
+               answers[int(cd[1])-1] = int(cd[0])
+               user_data_test[int(cd[2])] = answers
+    except Exception as e:
+        print(repr(e))
 
 bot.polling()
