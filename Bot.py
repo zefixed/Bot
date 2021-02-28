@@ -631,8 +631,7 @@ def callback_test(call):
                for row in score:
                    qty_right_answers += int(row)
                test_ringt_ans[call.from_user.id] = right_answers
-               msg = bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(
-                   user_data[call.from_user.id][1]) + ' или ' + str(round(100 / int(user_data[call.from_user.id][1]) * int(qty_right_answers), 2)) + '%',
+               msg = bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(user_data[call.from_user.id][1]) + ' или ' + str(round(100 / int(user_data[call.from_user.id][1]) * int(qty_right_answers), 2)) + '%',
                                       reply_markup=cfg.kb_test_mistakes)
                bot.register_next_step_handler(msg, test_mistakes)
            if call.data != 'end':
