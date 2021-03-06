@@ -606,40 +606,41 @@ def admin_panel_delete2(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_test(call):
     try:
-       if call.message:
-           if call.data == "end":
-               qty_right_answers = 0
-               score = [0] * int(user_data[call.from_user.id][1])
-               test_ans[call.from_user.id] = user_data_test.get(call.from_user.id)
-               right_answers = [0] * int(user_data[call.from_user.id][1])
-               i = 0
-               for row in test[call.from_user.id]:
-                   right_answers[i] = row[3]
-                   i += 1
-               i = 0
-               for row in test_ans[call.from_user.id]:
-                   test_ans[call.from_user.id][i] = int(row)
-                   i += 1
-               i = 0
-               for row in right_answers:
-                   if row == test_ans[call.from_user.id][i]:
-                       score[i] = 1
-                       i += 1
-                   elif row != test_ans[call.from_user.id][i]:
-                       score[i] = 0
-                       i += 1
-               for row in score:
-                   qty_right_answers += int(row)
-               test_ringt_ans[call.from_user.id] = right_answers
-               msg = bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(user_data[call.from_user.id][1]) + ' или ' + str(round(100 / int(user_data[call.from_user.id][1]) * int(qty_right_answers), 2)) + '%',
-                                      reply_markup=cfg.kb_test_mistakes)
-               bot.register_next_step_handler(msg, test_mistakes)
-           if call.data != 'end':
-               cd = call.data
-               cd = cd.split()
-               answers = user_data_test.get(int(cd[2]))
-               answers[int(cd[1])-1] = int(cd[0])
-               user_data_test[int(cd[2])] = answers
+        if call.message:
+            if call.data == "end":
+                qty_right_answers = 0
+                score = [0] * int(user_data[call.from_user.id][1])
+                test_ans[call.from_user.id] = user_data_test.get(call.from_user.id)
+                right_answers = [0] * int(user_data[call.from_user.id][1])
+                i = 0
+                for row in test[call.from_user.id]:
+                    right_answers[i] = row[3]
+                    i += 1
+                i = 0
+                for row in test_ans[call.from_user.id]:
+                    test_ans[call.from_user.id][i] = int(row)
+                    i += 1
+                i = 0
+                for row in right_answers:
+                    if row == test_ans[call.from_user.id][i]:
+                        score[i] = 1
+                        i += 1
+                    elif row != test_ans[call.from_user.id][i]:
+                        score[i] = 0
+                        i += 1
+                for row in score:
+                    qty_right_answers += int(row)
+                test_ringt_ans[call.from_user.id] = right_answers
+                msg = bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(
+                    user_data[call.from_user.id][1]) + ' или ' + str(round(100 / int(user_data[call.from_user.id][1]) * int(qty_right_answers), 2)) + '%',
+                                       reply_markup=cfg.kb_test_mistakes)
+                bot.register_next_step_handler(msg, test_mistakes)
+            if call.data != 'end':
+                cd = call.data
+                cd = cd.split()
+                answers = user_data_test.get(int(cd[2]))
+                answers[int(cd[1]) - 1] = int(cd[0])
+                user_data_test[int(cd[2])] = answers
     except Exception as e:
         print(repr(e))
 
