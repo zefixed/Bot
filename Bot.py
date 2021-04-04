@@ -74,8 +74,9 @@ def start_help_message(message):
                                               'Фамилия: {}\n'
                                               'id в боте: {}\n'
                                               'Telegram id: {}\n'
+                                              'Деньги: {}₿\n'
                                               'Дата и время первичной регистрации в боте: {}\n'
-                                              'Дата и время последней перерегистрации в боте: {}'.format(i[2], i[3], i[0], i[1], i[4], i[5]))
+                                              'Дата и время последней перерегистрации в боте: {}'.format(i[2], i[3], i[0], i[1], float(i[6]), i[4], i[5]))
         elif message.text == '/test':
             msg = bot.send_message(message.chat.id, 'Из скольки вопросов должен состоять тест?\n(Можете написать своё количество вопросов)', reply_markup=cfg.kb_test_qty)
             bot.register_next_step_handler(msg, test_qty)
@@ -291,17 +292,6 @@ def easter_egg(message):
         elif message.text == 'Выйти':
             msg = bot.send_message(message.chat.id, 'Вы можете выбрать функцию или просмотрите список доступных /help')
             bot.register_next_step_handler(msg, start_help_message)
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
-
-
-def acc_info(message):
-    try:
-        cursor.execute("SELECT * FROM users WHERE user_id = " + message.from_user.id + "")
-        rows = cursor.fetchall()
-        for row in rows:
-            print(row)
-
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
@@ -631,9 +621,16 @@ def callback_test(call):
                 for row in score:
                     qty_right_answers += int(row)
                 test_ringt_ans[call.from_user.id] = right_answers
-                msg = bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(
+                bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(
                     user_data[call.from_user.id][1]) + ' или ' + str(round(100 / int(user_data[call.from_user.id][1]) * int(qty_right_answers), 2)) + '%',
                                        reply_markup=cfg.kb_test_mistakes)
+                msg = bot.send_message(call.message.chat.id, 'На ваш счёт зачисленно 0.000{}₿'.format(qty_right_answers))
+
+                cursor.execute('SELECT btc FROM users WHERE user_id = ' + str(call.from_user.id) + '')
+                old_btc = cursor.fetchone()[0]
+                cursor.execute('UPDATE users SET btc = '  + str(old_btc + int(qty_right_answers)*0.0001) + ' WHERE user_id = ' + str(call.from_user.id) + '')
+                db.commit()
+
                 bot.register_next_step_handler(msg, test_mistakes)
             if call.data != 'end':
                 cd = call.data
