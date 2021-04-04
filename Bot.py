@@ -29,7 +29,7 @@ name = ''
 question = ''
 
 
-@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'feedback', 'cookie', 'acc_info', 'test', 'adm'])
+@bot.message_handler(commands=['start', 'ask', 'help', 'reg', 'rereg', 'info', 'feedback', 'cookie', 'acc_info', 'test', 'shop', 'adm'])
 def start_help_message(message):
     try:
         if message.text == '/start':
@@ -47,7 +47,8 @@ def start_help_message(message):
                                               '6. /info (Показывает информацию обо мне)\n'
                                               '7. /feedback (Позволяет сообщить об ошибке или предложить нововведение)\n'
                                               '8. /acc_info (Позволяет просмотреть инфромацию об аккаунте в боте)\n'
-                                              '9. /test (Позволяет проверить свои знания)')
+                                              '9. /test (Позволяет проверить свои знания)'
+                                              '10. /shop (Магазин)')
         elif message.text == '/reg':
             name = bot.send_message(message.chat.id, 'Введите имя')
             bot.register_next_step_handler(name, reg_firstname_step)
@@ -80,6 +81,8 @@ def start_help_message(message):
         elif message.text == '/test':
             msg = bot.send_message(message.chat.id, 'Из скольки вопросов должен состоять тест?\n(Можете написать своё количество вопросов)', reply_markup=cfg.kb_test_qty)
             bot.register_next_step_handler(msg, test_qty)
+        elif message.text == '/shop':
+            pass
         elif message.text == '/adm':
             msg = bot.send_message(message.chat.id, 'Введите пароль')
             bot.register_next_step_handler(msg, admin_panel)
