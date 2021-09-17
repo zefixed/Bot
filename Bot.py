@@ -48,7 +48,7 @@ def start_help_message(message):
                                               '6. /info (Показывает информацию обо мне)\n'
                                               '7. /feedback (Позволяет сообщить об ошибке или предложить нововведение)\n'
                                               '8. /acc_info (Позволяет просмотреть инфромацию об аккаунте в боте)\n'
-                                              '9. /test (Позволяет проверить свои знания)'
+                                              '9. /test (Позволяет проверить свои знания)\n'
                                               '10. /shop (Магазин)')
         elif message.text == '/reg':
             name = bot.send_message(message.chat.id, 'Введите имя')
@@ -83,7 +83,8 @@ def start_help_message(message):
             msg = bot.send_message(message.chat.id, 'Из скольки вопросов должен состоять тест?\n(Можете написать своё количество вопросов)', reply_markup=cfg.kb_test_qty)
             bot.register_next_step_handler(msg, test_qty)
         elif message.text == '/shop':
-            pass
+            msg = bot.send_message(message.chat.id, 'В разработке')
+            bot.register_next_step_handler(msg, start_help_message)
         elif message.text == '/adm':
             msg = bot.send_message(message.chat.id, 'Введите пароль')
             bot.register_next_step_handler(msg, admin_panel)
@@ -108,6 +109,10 @@ def ask_viev(message):
         table = message.text
         if message.text == 'Математика':
             table = 'math'
+        elif message.text == 'Физика':
+            table = 'phys'
+        elif message.text == 'Информатика':
+            table = 'inf'
         cursor.execute("SELECT * FROM " + table + " ORDER BY id")
         rows = cursor.fetchall()
         user_data[message.from_user.id] = [''] * 10
@@ -136,6 +141,7 @@ def ask_viev(message):
             if i > 0:
                 i -= 1
                 bot.send_message(message.chat.id, str(q) + '. ' + '{}'.format(row))
+                q+=1
         msg = bot.send_message(message.chat.id, 'Хотите задать вопрос или просмотреть доступные вопросы ещё раз?',
                                reply_markup=cfg.kb_yes_no)
         bot.register_next_step_handler(msg, ask_except)
@@ -145,10 +151,16 @@ def ask_viev(message):
 
 def ask_set_table(message):
     try:
+        table = message.text
         if message.text == 'Математика':
-            user_data[message.from_user.id] = 'math'
-            msg = bot.send_message(message.chat.id,'Введите вопрос')
-            bot.register_next_step_handler(msg, ask_set_question)
+            table = 'math'
+        elif message.text == 'Физика':
+            table = 'phys'
+        elif message.text == 'Информатика':
+            table = 'inf'
+        user_data[message.from_user.id] = table
+        msg = bot.send_message(message.chat.id,'Введите вопрос')
+        bot.register_next_step_handler(msg, ask_set_question)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
@@ -315,6 +327,10 @@ def test_table(message):
         datab_data[message.from_user.id] = message.text
         if message.text == 'Математика':
             datab_data[message.from_user.id] = 'math'
+        elif message.text == 'Физика':
+            datab_data[message.from_user.id] = 'phys'
+        elif message.text == 'Информатика':
+            datab_data[message.from_user.id] = 'inf'
         if message.text != 'Выход':
             cursor.execute('SELECT id, question, answer FROM ' + datab_data[message.from_user.id] + '')
             rows = cursor.fetchall()
