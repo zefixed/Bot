@@ -14,7 +14,7 @@ kb_admc = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_admc.row('Создать новую запись', 'Удалить запись').add('Просмотреть все записи', 'Выйти')
 
 kb_adm_table = telebot.types.ReplyKeyboardMarkup(True, True)
-kb_adm_table.row('math')
+kb_adm_table.row('math', 'phys', 'inf')
 
 kb_adm = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_adm.row('/adm')
@@ -29,10 +29,10 @@ kb_ask = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_ask.row('Просмотреть список доступных вопросов', 'Написать вручную')
 
 kb_ask_t = telebot.types.ReplyKeyboardMarkup(True, True)
-kb_ask_t.row('Математика')
+kb_ask_t.row('Математика', 'Физика', 'Информатика')
 
 kb_test = telebot.types.ReplyKeyboardMarkup(True, True)
-kb_test.row('Математика', 'Выход')
+kb_test.row('Математика', 'Физика', 'Информатика', 'Выход')
 
 kb_test_qty = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_test_qty.row('5', '7', '10', '15')
