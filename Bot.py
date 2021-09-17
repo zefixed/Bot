@@ -1,8 +1,9 @@
 import telebot
+from telebot import types
 import mysql.connector
 import config as cfg
 import random as r
-from telebot import types
+
 
 db = mysql.connector.connect(
     host="localhost",
