@@ -1,6 +1,11 @@
 import telebot
 from telebot import types
 
+letters = {'3':('Б', 'В', 'Г'), '4':('А', 'В'), '5':('А', 'Б'), '6':('А', 'Б', 'И'),
+           '7':('А', 'Б', 'Е(ен/г)', 'К', 'Л', 'М', 'Т'), '8':('Г', 'Е', 'М', 'Т'),
+           '9':('А', 'Б', 'М'), '10':('А(медиа)', 'А(унив)', 'И(инж)', 'И(it)', 'К(соц-эк)', 'К(хим-био)'),
+           '11':('А', 'Б(инж)', 'Б(соц-эк)', 'Б(хим-био)', 'Б(унив)', 'В(1)', 'В(2)')}
+
 token = '1348485436:AAHMeMOVAXSfgVaA0208oy5cdRUGWIN0pIg'
 token_old = '1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY'
 
@@ -16,14 +21,11 @@ kb_admc.row('Создать новую запись', 'Удалить запис
 kb_adm_table = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_adm_table.row('math', 'phys', 'inf')
 
-kb_adm = telebot.types.ReplyKeyboardMarkup(True, True)
-kb_adm.row('/adm')
-
 kb_yes_no = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_yes_no.row('Да', 'Нет')
 
 kb_fb = telebot.types.ReplyKeyboardMarkup(True, True)
-kb_fb.row('Проблема', 'Предложение')
+kb_fb.row('Жалоба', 'Предложение')
 
 kb_ask = telebot.types.ReplyKeyboardMarkup(True, True)
 kb_ask.row('Просмотреть список доступных вопросов', 'Написать вручную')
