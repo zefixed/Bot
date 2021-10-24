@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 import mysql.connector
 import config as cfg
-import random as r
+import random
 
 
 db = mysql.connector.connect(
@@ -67,11 +67,19 @@ def start_help_message(message):
                                               'Пока что я могу помочь тебе только по математике 8-11 классов. \n'
                                               'Мои разработчики стараются над введением новых вопросов, если ты хочешь помочь им или нашёл какой-то недочёт в моей работе, пожалуйста, напиши им об этом с помощью /feedback')
         elif message.text == '/feedback':
-            msg = bot.send_message(message.chat.id, 'О чём вы бы хотели сообщить?', reply_markup=cfg.kb_fb)
-            bot.register_next_step_handler(msg, feedback_start)
+            kb_fb = types.InlineKeyboardMarkup(row_width=2)
+            kb_fb_complaint = types.InlineKeyboardButton(text="Жалоба", callback_data="complaint " + str(message.from_user.id) + " feedback")
+            kb_fb_suggestion = types.InlineKeyboardButton(text="Предложение", callback_data="suggestion " + str(message.from_user.id) + " feedback")
+            kb_fb.add(kb_fb_complaint, kb_fb_suggestion)
+            msg = bot.send_message(message.chat.id, 'О чём вы бы хотели сообщить?', reply_markup=kb_fb)
+            bot.register_next_step_handler(msg, callback)
         elif message.text == '/cookie':
-            msg = bot.send_message(message.chat.id, 'Покормить разработчиков', reply_markup=cfg.kb_cookie)
-            bot.register_next_step_handler(msg, easter_egg)
+            kb_cookie = types.InlineKeyboardMarkup(row_width=2)
+            kb_cookie_give = types.InlineKeyboardButton(text="Дать печеньку", callback_data="give " + str(message.from_user.id) + " cookie")
+            kb_cookie_exit = types.InlineKeyboardButton(text="Выйти", callback_data="exit " + str(message.from_user.id) + " cookie")
+            kb_cookie.add(kb_cookie_give, kb_cookie_exit)
+            msg = bot.send_message(message.chat.id, 'Покормить разработчиков', reply_markup=kb_cookie)
+            bot.register_next_step_handler(msg, callback)
         elif message.text == '/acc_info':
             bot.send_message(message.chat.id, 'Информация об аккаунте')
             cursor.execute("SELECT * FROM users WHERE user_id = " + str(message.from_user.id) + "")
@@ -85,8 +93,14 @@ def start_help_message(message):
                                               'Дата и время первичной регистрации в боте: {}\n'
                                               'Дата и время последней перерегистрации в боте: {}'.format(i[2], i[3], i[0], i[1], float(i[6]), i[4], i[5]))
         elif message.text == '/test':
-            msg = bot.send_message(message.chat.id, 'Из скольки вопросов должен состоять тест?\n(Можете написать своё количество вопросов)', reply_markup=cfg.kb_test_qty)
-            bot.register_next_step_handler(msg, test_qty)
+            kb_test_qty = types.InlineKeyboardMarkup(row_width=4)
+            kb_test_qty_2 = types.InlineKeyboardButton(text="2", callback_data="2 " + str(message.from_user.id) + " test_qty")
+            kb_test_qty_5 = types.InlineKeyboardButton(text="5", callback_data="5 " + str(message.from_user.id) + " test_qty")
+            kb_test_qty_7 = types.InlineKeyboardButton(text="7", callback_data="7 " + str(message.from_user.id) + " test_qty")
+            kb_test_qty_10 = types.InlineKeyboardButton(text="10", callback_data="10 " + str(message.from_user.id) + " test_qty")
+            kb_test_qty.add(kb_test_qty_2, kb_test_qty_5, kb_test_qty_7, kb_test_qty_10)
+            msg = bot.send_message(message.chat.id, 'Из скольки вопросов должен состоять тест?\n(Можете написать своё количество вопросов)', reply_markup=kb_test_qty)
+            bot.register_next_step_handler(msg, callback)
         elif message.text == '/shop':
             msg = bot.send_message(message.chat.id, 'В разработке')
             bot.register_next_step_handler(msg, start_help_message)
@@ -188,19 +202,7 @@ def rereg_lastname_step(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-def feedback_start(message):
-    try:
-        if message.text == 'Жалоба':
-            msg = bot.send_message(message.chat.id, 'Опишите проблему')
-            bot.register_next_step_handler(msg, feedback_problem)
-        elif message.text == 'Предложение':
-            msg = bot.send_message(message.chat.id, 'Напишите предложение')
-            bot.register_next_step_handler(msg, feedback_request)
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
-
-
-def feedback_problem(message):
+def feedback_complaint(message):
     try:
         user_id = message.from_user.id
         problem = message.text
@@ -216,7 +218,7 @@ def feedback_problem(message):
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
 
-def feedback_request(message):
+def feedback_suggestion(message):
     try:
         user_id = message.from_user.id
         request = message.text
@@ -228,27 +230,6 @@ def feedback_request(message):
 
         msg= bot.send_message(message.chat.id, 'Мы учтём ваше пожелание')
         bot.register_next_step_handler(msg, start_help_message)
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
-
-
-def easter_egg(message):
-    try:
-        if message.text == 'Дать печеньку':
-            cursor.execute('SELECT cookies FROM easter_egg WHERE id = 1')
-            cookies = cursor.fetchall()
-            count = cookies[0]
-            count_old = count = count[0]
-            count +=1
-            sql = ('UPDATE easter_egg SET cookies = %s WHERE cookies = %s')
-            val = (count, count_old)
-            cursor.execute(sql, val)
-            db.commit()
-            msg = bot.send_message(message.chat.id, 'Всего печенек, {}'.format(count), reply_markup=cfg.kb_cookie)
-            bot.register_next_step_handler(msg, easter_egg)
-        elif message.text == 'Выйти':
-            msg = bot.send_message(message.chat.id, 'Вы можете выбрать функцию или просмотрите список доступных /help')
-            bot.register_next_step_handler(msg, start_help_message)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка, {}'.format(e))
 
@@ -558,46 +539,46 @@ def admin_panel_delete2(message):
 def callback(call):
     try:
         if call.message:
-            if call.data == "end":
+            if "test_end" in call.data:
+                cd = call.data.split()
                 qty_right_answers = 0
-                score = [0] * int(user_data[call.from_user.id][1])
-                test_ans[call.from_user.id] = user_data_test.get(call.from_user.id)
-                right_answers = [0] * int(user_data[call.from_user.id][1])
+                score = [0] * int(user_data[cd[1]][1])
+                test_ans[cd[1]] = user_data_test.get(cd[1])
+                right_answers = [0] * int(user_data[cd[1]][1])
                 i = 0
-                for row in test[call.from_user.id]:
+                for row in test[cd[1]]:
                     right_answers[i] = row[3]
                     i += 1
                 i = 0
-                for row in test_ans[call.from_user.id]:
-                    test_ans[call.from_user.id][i] = int(row)
+                for row in test_ans[cd[1]]:
+                    test_ans[cd[1]][i] = int(row)
                     i += 1
                 i = 0
                 for row in right_answers:
-                    if row == test_ans[call.from_user.id][i]:
+                    if row == test_ans[cd[1]][i]:
                         score[i] = 1
                         i += 1
-                    elif row != test_ans[call.from_user.id][i]:
+                    elif row != test_ans[cd[1]][i]:
                         score[i] = 0
                         i += 1
                 for row in score:
                     qty_right_answers += int(row)
-                test_ringt_ans[call.from_user.id] = right_answers
-                bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' + str(
-                    user_data[call.from_user.id][1]) + ' или ' + str(round(100 / int(user_data[call.from_user.id][1]) * int(qty_right_answers), 2)) + '%',
-                                       reply_markup=cfg.kb_test_mistakes)
+                test_ringt_ans[cd[1]] = right_answers
+                kb_test_mistakes = types.InlineKeyboardMarkup(row_width=1)
+                kb_test_mistakes_check = types.InlineKeyboardButton(text="Просмотреть ошибки", callback_data="check " + str(cd[1]) + " test_mistakes")
+                kb_test_mistakes.add(kb_test_mistakes_check)
+                bot.send_message(call.message.chat.id, 'Ваш результат ' + str(qty_right_answers) + '/' +
+                str(user_data[cd[1]][1]) + ' или ' + str(round(100 / int(user_data[cd[1]][1]) * int(qty_right_answers), 2)) + '%', reply_markup=kb_test_mistakes)
                 msg = bot.send_message(call.message.chat.id, 'На ваш счёт зачисленно 0.000{}₿'.format(qty_right_answers))
-
-                cursor.execute('SELECT btc FROM users WHERE user_id = ' + str(call.from_user.id) + '')
+                cursor.execute('SELECT btc FROM users WHERE user_id = ' + str(cd[1]) + '')
                 old_btc = cursor.fetchone()[0]
-                cursor.execute('UPDATE users SET btc = '  + str(old_btc + int(qty_right_answers)*0.0001) + ' WHERE user_id = ' + str(call.from_user.id) + '')
+                cursor.execute('UPDATE users SET btc = '  + str(old_btc + int(qty_right_answers)*0.0001) + ' WHERE user_id = ' + str(cd[1]) + '')
                 db.commit()
-
-                bot.register_next_step_handler(msg, test_mistakes)
+                bot.register_next_step_handler(msg, callback)
 
             elif 'test_answers' in call.data:
-                cd = call.data
-                cd = cd.split()
-                answers = user_data_test.get(int(cd[2]))
+                cd = call.data.split()
+                answers = user_data_test.get(cd[2])
                 answers[int(cd[1]) - 1] = int(cd[0])
                 user_data_test[int(cd[2])] = answers
 
@@ -727,6 +708,160 @@ def callback(call):
                     bot.register_next_step_handler(msg, callback)
                 elif cd[0] == 'no':
                     msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Вы можете выбрать функцию или просмотрите список доступных /help')
+                    bot.register_next_step_handler(msg, start_help_message)
+
+            elif 'feedback' in call.data:
+                cd = call.data.split()
+                if cd[0] == 'complaint':
+                    msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text= 'Опишите проблему')
+                    bot.register_next_step_handler(msg, feedback_complaint)
+                elif cd[0] == 'suggestion':
+                    msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text= 'Напишите предложение')
+                    bot.register_next_step_handler(msg, feedback_suggestion)
+
+            elif 'cookie' in call.data:
+                cd = call.data.split()
+                if cd[0] == 'give':
+                    cursor.execute('SELECT cookies FROM easter_egg WHERE id = 1')
+                    cookies = cursor.fetchall()
+                    count = cookies[0]
+                    count_old = count = count[0]
+                    count += 1
+                    sql = ('UPDATE easter_egg SET cookies = %s WHERE cookies = %s')
+                    val = (count, count_old)
+                    cursor.execute(sql, val)
+                    db.commit()
+                    kb_cookie = types.InlineKeyboardMarkup(row_width=2)
+                    kb_cookie_give = types.InlineKeyboardButton(text="Дать печеньку", callback_data="give " + str(cd[1]) + " cookie")
+                    kb_cookie_exit = types.InlineKeyboardButton(text="Выйти", callback_data="exit " + str(cd[1]) + " cookie")
+                    kb_cookie.add(kb_cookie_give, kb_cookie_exit)
+                    msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Всего печенек, {}'.format(count), reply_markup=kb_cookie)
+                    bot.register_next_step_handler(msg, callback)
+                elif cd[0] == 'exit':
+                    msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Вы можете выбрать функцию или просмотрите список доступных /help')
+                    bot.register_next_step_handler(msg, start_help_message)
+
+            elif 'test_qty' in call.data:
+                cd = call.data.split()
+                user_data[cd[1]] = [cd[0], cd[0]]
+                user_data_add[cd[1]] = 1
+                kb_test = types.InlineKeyboardMarkup(row_width=2)
+                kb_test_math = types.InlineKeyboardButton(text="Математика", callback_data="math " + str(cd[1]) + " test_table")
+                kb_test_phys = types.InlineKeyboardButton(text="Физика", callback_data="phys " + str(cd[1]) + " test_table")
+                kb_test_inf = types.InlineKeyboardButton(text="Информатика", callback_data="inf " + str(cd[1]) + " test_table")
+                kb_test_exit = types.InlineKeyboardButton(text="Выход", callback_data="exit " + str(cd[1]) + " test_table")
+                kb_test.add(kb_test_math, kb_test_phys, kb_test_inf, kb_test_exit)
+                msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='По какой теме вы бы хотели проверить свои знания?', reply_markup=kb_test)
+                bot.register_next_step_handler(msg, callback)
+
+            elif 'test_table' in call.data:
+                cd = call.data.split()
+                datab_data[cd[1]] = cd[0]
+                if cd[0] != 'exit':
+                    cursor.execute('SELECT id, question, answer FROM ' + datab_data[cd[1]] + '')
+                    rows = cursor.fetchall()
+                    test[cd[1]] = random.sample(rows, int(user_data.get(cd[1])[0]))
+                    ques = [[]] * int(user_data.get(cd[1])[0])
+                    i = 0
+                    for que in test[cd[1]]:
+                        q = [0, '', '']
+                        q[0] = que[0]
+                        q[1] = que[1]
+                        q[2] = que[2]
+                        ques[i] = q
+                        i += 1
+                    i = 0
+                    for que in ques:
+                        q = [0, '', '', 0]
+                        q[0] = que[0]
+                        l = len(que[1])
+                        q[1] = que[1][0:l // 2]
+                        q[2] = que[2]
+                        q[3] = random.randint(1, 4)
+                        ques[i] = q
+                        i += 1
+                    test[cd[1]] = ques
+                    kb_yes_no = types.InlineKeyboardMarkup(row_width=2)
+                    kb_yes = types.InlineKeyboardButton(text="Да", callback_data="yes " + cd[1] + " test_main")
+                    kb_no = types.InlineKeyboardButton(text="Нет", callback_data="no " + cd[1] + " test_main")
+                    kb_yes_no.add(kb_yes, kb_no)
+                    msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Ваш тест сгенерирован, перейти к тесту?', reply_markup=kb_yes_no)
+                    bot.register_next_step_handler(msg, callback)
+                elif cd[0] == 'Выход':
+                    msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Понял, принял, сегодня без тестов')
+                    bot.register_next_step_handler(msg, start_help_message)
+
+            elif 'test_main' in call.data:
+                cd = call.data.split()
+                if cd[0] == 'yes':
+                    while user_data[cd[1]][0] != 0:
+                        i = user_data_add[cd[1]]
+                        cursor.execute('SELECT answer FROM ' + str(datab_data[cd[1]]) + ' WHERE id != ' + str(test[cd[1]][i - 1][0]) + '')
+                        rows = cursor.fetchall()
+                        kb_1234 = types.InlineKeyboardMarkup(row_width=2)
+                        kb_1 = types.InlineKeyboardButton(text="1️⃣", callback_data="1 " + str(i) + " " + str(cd[1]) + " test_answers")
+                        kb_2 = types.InlineKeyboardButton(text="2️⃣", callback_data="2 " + str(i) + " " + str(cd[1]) + " test_answers")
+                        kb_3 = types.InlineKeyboardButton(text="3️⃣", callback_data="3 " + str(i) + " " + str(cd[1]) + " test_answers")
+                        kb_4 = types.InlineKeyboardButton(text="4️⃣", callback_data="4 " + str(i) + " " + str(cd[1]) + " test_answers")
+                        kb_1234.add(kb_1, kb_2, kb_3, kb_4)
+                        if test[cd[1]][i - 1][3] == 1:
+                            oth = random.sample(rows, 3)
+                            msg = bot.send_message(call.message.chat.id, 'Вопрос №' + str(i) + '\n'
+                                                                        '' + str(test[cd[1]][i - 1][1]) + '\n\n'
+                                                                        'Варианты ответов:\n'
+                                                                        '1) ' + str(test[cd[1]][i - 1][2]) + '\n'
+                                                                        '2) ' + str(oth[0][0]) + '\n'
+                                                                        '3) ' + str(oth[1][0]) + '\n'
+                                                                        '4) ' + str(oth[2][0]) + '\n', reply_markup=kb_1234)
+                            user_data[cd[1]][0] = int(user_data[cd[1]][0]) - 1
+                            user_data_add[cd[1]] = int(user_data_add[cd[1]]) + 1
+                        elif test[cd[1]][i - 1][3] == 2:
+                            oth = random.sample(rows, 3)
+                            msg = bot.send_message(call.message.chat.id, 'Вопрос №' + str(i) + '\n'
+                                                                        '' + test[cd[1]][i - 1][1] + '\n\n'
+                                                                        'Варианты ответов:\n'
+                                                                        '1) ' + str(oth[0][0]) + '\n'
+                                                                        '2) ' + str(test[cd[1]][i - 1][2]) + '\n'
+                                                                        '3) ' + str(oth[1][0]) + '\n'
+                                                                        '4) ' + str(oth[2][0]) + '\n', reply_markup=kb_1234)
+                            user_data[cd[1]][0] = int(user_data[cd[1]][0]) - 1
+                            user_data_add[cd[1]] = int(user_data_add[cd[1]]) + 1
+                        elif test[cd[1]][i - 1][3] == 3:
+                            oth = random.sample(rows, 3)
+                            msg = bot.send_message(call.message.chat.id, 'Вопрос №' + str(i) + '\n'
+                                                                        '' + test[cd[1]][i - 1][1] + '\n\n'
+                                                                        'Варианты ответов:\n'
+                                                                        '1) ' + str(oth[1][0]) + '\n'
+                                                                        '2) ' + str(oth[0][0]) + '\n'
+                                                                        '3) ' + str(test[cd[1]][i - 1][2]) + '\n'
+                                                                        '4) ' + str(oth[2][0]) + '\n', reply_markup=kb_1234)
+                            user_data[cd[1]][0] = int(user_data[cd[1]][0]) - 1
+                            user_data_add[cd[1]] = int(user_data_add[cd[1]]) + 1
+                        elif test[cd[1]][i - 1][3] == 4:
+                            oth = random.sample(rows, 3)
+                            msg = bot.send_message(call.message.chat.id, 'Вопрос №' + str(i) + '\n'
+                                                                        '' + test[cd[1]][i - 1][1] + '\n\n'
+                                                                        'Варианты ответов:\n'
+                                                                        '1) ' + str(oth[2][0]) + '\n'
+                                                                        '2) ' + str(oth[0][0]) + '\n'
+                                                                        '3) ' + str(oth[1][0]) + '\n'
+                                                                        '4) ' + str(test[cd[1]][i - 1][2]) + '\n', reply_markup=kb_1234)
+                            user_data[cd[1]][0] = int(user_data[cd[1]][0]) - 1
+                            user_data_add[cd[1]] = int(user_data_add[cd[1]]) + 1
+                    else:
+                        kb_test_end = types.InlineKeyboardMarkup(row_width=2)
+                        kb_test_end_end = types.InlineKeyboardButton(text="Закончить прохождение теста", callback_data="end " + str(cd[1]) + " test_end")
+                        kb_test_end.add(kb_test_end_end)
+                        msg = bot.send_message(call.message.chat.id, 'Для проверки ответов воспользуйтесь кнопкой ниже', reply_markup=kb_test_end)
+                        user_data_test[cd[1]] = [0] * int(user_data[cd[1]][1])
+                        bot.register_next_step_handler(msg, callback)
+                elif cd[0] == 'no':
+                    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Ну, не хотите – как хотите')
+
+            elif 'test_mistakes' in call.data:
+                cd = call.data.split()
+                if cd[0] == 'check':
+                    msg = bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Правильные ответы ' + str(test_ringt_ans[cd[1]]) + '\nВаши ответы                ' + str(test_ans[cd[1]]) + '')
                     bot.register_next_step_handler(msg, start_help_message)
 
     except Exception as e:
