@@ -6,7 +6,7 @@ letters = {'3':('Б', 'В', 'Г'), '4':('А', 'В'), '5':('А', 'Б'), '6':('А'
            '9':('А', 'Б', 'М'), '10':('А(медиа)', 'А(унив)', 'И(инж)', 'И(it)', 'К(соц-эк)', 'К(хим-био)'),
            '11':('А', 'Б(инж)', 'Б(соц-эк)', 'Б(хим-био)', 'Б(унив)', 'В(1)', 'В(2)')}
 
-token = '1348485436:AAHMeMOVAXSfgVaA0208oy5cdRUGWIN0pIg'
+token = '1348485436:AAGE2oXJ6uxAHwHRaaagEJUZK7_Mz547N1E'
 token_old = '1246639039:AAGXABe2xAj33-N7Auqld5J9ZRTXa6NdtDY'
 
 kb = telebot.types.ReplyKeyboardMarkup(True, True)
